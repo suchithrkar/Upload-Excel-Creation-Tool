@@ -515,6 +515,10 @@ function parseGNProCSV(text) {
   return map;
 }
 
+function stripOrderSuffix(orderId) {
+  return String(orderId || "").replace(/-0\d$/, "");
+}
+
 async function processGNProCSOFile(file) {
   const store = getStore("readonly");
   const allData = await new Promise(res => {
@@ -649,10 +653,6 @@ function normalizeText(val) {
   return String(val || "").trim().toLowerCase();
 }
 
-function stripOrderSuffix(orderId) {
-  return String(orderId || "").replace(/-0\d$/, "");
-}
-
 async function buildCopySOOrders() {
   const store = getStore("readonly");
   const allData = await new Promise(res => {
@@ -768,6 +768,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

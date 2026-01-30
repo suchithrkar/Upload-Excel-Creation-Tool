@@ -116,7 +116,7 @@ function initEmptyTables() {
 
     $(table).DataTable({
       pageLength: 25,
-      scrollX: true,
+      autoWidth: true,
       destroy: true
     });
 
@@ -288,6 +288,7 @@ function switchSheet(sheetName) {
 }
 
 document.addEventListener('DOMContentLoaded', initEmptyTables);
+
 
 
 

@@ -149,11 +149,19 @@ function initEmptyTables() {
 
     const thead = document.createElement('thead');
     const tr = document.createElement('tr');
+    
+    // Serial number column
+    const snTh = document.createElement('th');
+    snTh.textContent = "S.No";
+    tr.appendChild(snTh);
+    
+    // Actual headers
     headers.forEach(h => {
       const th = document.createElement('th');
       th.textContent = h;
       tr.appendChild(th);
     });
+
     thead.appendChild(tr);
     table.appendChild(thead);
 
@@ -165,8 +173,17 @@ function initEmptyTables() {
 
     const dt = $(table).DataTable({
       pageLength: 25,
-      autoWidth: true
+      autoWidth: true,
+      columnDefs: [
+        {
+          targets: 0,
+          searchable: false,
+          orderable: false
+        }
+      ],
+      order: [[1, 'asc']]
     });
+    attachSerialNumber(dt);
 
     dataTablesMap[sheetName] = dt;
 
@@ -179,6 +196,16 @@ function initEmptyTables() {
     tabsDiv.appendChild(tab);
 
     first = false;
+  });
+}
+
+function attachSerialNumber(dt) {
+  dt.on('order.dt search.dt draw.dt', function () {
+    dt.column(0, { search: 'applied', order: 'applied' })
+      .nodes()
+      .each((cell, i) => {
+        cell.innerHTML = i + 1;
+      });
   });
 }
 
@@ -583,7 +610,17 @@ async function buildCopySOOrders() {
 
 document.getElementById("copySoBtn").addEventListener("click", async () => {
   const output = await buildCopySOOrders();
-  document.getElementById("soOutput").value = output || "No eligible cases found.";
+
+  const lines = output
+    ? output.split("\n").filter(l => l.trim() !== "")
+    : [];
+
+  document.getElementById("soOutput").value =
+    lines.length ? lines.join("\n") : "No eligible cases found.";
+
+  document.getElementById("soCount").textContent =
+    `Total cases: ${lines.length}`;
+
   document.getElementById("soModal").style.display = "flex";
 });
 
@@ -623,6 +660,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

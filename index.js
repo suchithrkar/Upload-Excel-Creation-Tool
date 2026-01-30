@@ -78,6 +78,39 @@ const TABLE_SCHEMAS = {
   ]
 };
 
+const DB_NAME = "KCI_CASE_TRACKER_DB";
+const DB_VERSION = 1;
+const STORE_NAME = "cases";
+
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = function (e) {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "caseId" });
+      }
+    };
+
+    request.onsuccess = function (e) {
+      db = e.target.result;
+      resolve(db);
+    };
+
+    request.onerror = function () {
+      reject("Failed to open IndexedDB");
+    };
+  });
+}
+
+function getStore(mode = "readonly") {
+  const tx = db.transaction(STORE_NAME, mode);
+  return tx.objectStore(STORE_NAME);
+}
+
 function initEmptyTables() {
   const container = document.getElementById('tablesContainer');
   container.innerHTML = '';
@@ -256,7 +289,34 @@ function buildSheetTables(workbook) {
       });
       
       dataTable.draw(false);
-  
+
+      const store = getStore("readwrite");
+      
+      rows.forEach(row => {
+        const caseIdIndex = headers.indexOf("Case ID");
+        if (caseIdIndex === -1) return;
+      
+        const caseId = row[caseIdIndex];
+        if (!caseId) return;
+      
+        const getReq = store.get(caseId);
+      
+        getReq.onsuccess = function () {
+          const existing = getReq.result || { caseId };
+      
+          if (Array.isArray(existing[sheetName])) {
+            existing[sheetName].push(row);
+          } else if (existing[sheetName]) {
+            existing[sheetName] = row;
+          } else {
+            existing[sheetName] = row;
+          }
+      
+          existing.lastUpdated = new Date().toISOString();
+          store.put(existing);
+        };
+      });
+      
       processed++;
       const percent = Math.round((processed / sheetNames.length) * 100);
       progressBar.style.width = percent + '%';
@@ -265,6 +325,36 @@ function buildSheetTables(workbook) {
     statusText.textContent = 'Processing complete';
     document.getElementById('processBtn').disabled = true;
   })();
+}
+
+function loadDataFromDB() {
+  const store = getStore("readonly");
+  const request = store.getAll();
+
+  request.onsuccess = function () {
+    const records = request.result;
+
+    Object.keys(TABLE_SCHEMAS).forEach(sheetName => {
+      const wrapper = tablesMap[sheetName];
+      if (!wrapper) return;
+
+      const table = wrapper.querySelector("table");
+      const dt = $(table).DataTable();
+      dt.clear();
+
+      records.forEach(rec => {
+        if (!rec[sheetName]) return;
+
+        if (Array.isArray(rec[sheetName])) {
+          rec[sheetName].forEach(row => dt.row.add(row));
+        } else {
+          dt.row.add(rec[sheetName]);
+        }
+      });
+
+      dt.draw(false);
+    });
+  };
 }
 
 function switchSheet(sheetName) {
@@ -288,7 +378,11 @@ function switchSheet(sheetName) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initEmptyTables);
+document.addEventListener('DOMContentLoaded', async () => {
+  await openDB();
+  initEmptyTables();
+  loadDataFromDB();
+});
 
 const themeToggle = document.getElementById('themeToggle');
 
@@ -306,6 +400,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

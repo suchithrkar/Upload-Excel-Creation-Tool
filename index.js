@@ -64,6 +64,7 @@ document.getElementById('processBtn').addEventListener('click', function () {
 
   reader.onload = function (evt) {
     const data = new Uint8Array(evt.target.result);
+    tablesMap = {};
     workbookCache = XLSX.read(data, { type: 'array' });
 
     buildSheetTables(workbookCache);
@@ -157,6 +158,7 @@ function buildSheetTables(workbook) {
     }
   
     statusText.textContent = 'Processing complete';
+    document.getElementById('processBtn').disabled = true;
   })();
 }
 
@@ -169,6 +171,7 @@ function switchSheet(sheetName) {
     tablesMap[name].style.display = name === sheetName ? 'block' : 'none';
   });
 }
+
 
 
 

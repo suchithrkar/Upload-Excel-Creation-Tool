@@ -540,9 +540,13 @@ async function buildCopySOOrders() {
   const csoStatusIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Status");
 
   // Step 1: Offsite cases
-  const offsiteCases = dump
-    .filter(r => normalizeText(r[dumpIdx]) === "offsite solution")
-    .map(r => r[dumpCaseIdx]);
+  const offsiteCases = [
+    ...new Set(
+      dump
+        .filter(r => normalizeText(r[dumpIdx]) === "offsite solution")
+        .map(r => r[dumpCaseIdx])
+    )
+  ];
 
   const result = [];
 
@@ -551,9 +555,11 @@ async function buildCopySOOrders() {
     if (!soRows.length) return; // skip if no SO
 
     // latest SO by date
-    const latest = soRows.sort((a, b) =>
-      normalizeText(b[soDateIdx]).localeCompare(normalizeText(a[soDateIdx]))
-    )[0];
+    const latest = soRows.sort((a, b) => {
+      const da = new Date(a[soDateIdx]);
+      const db = new Date(b[soDateIdx]);
+      return db - da;
+    })[0];
 
     let orderId = stripOrderSuffix(latest[soOrderIdx]);
     if (!orderId) return;
@@ -617,6 +623,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

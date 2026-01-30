@@ -1,6 +1,7 @@
 let selectedFile = null;
 let workbookCache = null;
 let tablesMap = {};
+const dataTablesMap = {};
 const TABLE_SCHEMAS = {
   "Dump": [
     "Case ID",
@@ -148,11 +149,12 @@ function initEmptyTables() {
     tableWrapper.appendChild(table);
     container.appendChild(tableWrapper);
 
-    $(table).DataTable({
+    const dt = $(table).DataTable({
       pageLength: 25,
-      autoWidth: true,
-      destroy: true
+      autoWidth: true
     });
+
+    dataTablesMap[sheetName] = dt;
 
     tablesMap[sheetName] = tableWrapper;
 
@@ -294,7 +296,7 @@ function buildSheetTables(workbook) {
       if (!tableWrapper) continue;
       
       const table = tableWrapper.querySelector('table');
-      const dataTable = $(table).DataTable();
+      const dataTable = dataTablesMap[sheetName];
       dataTable.clear();
       
       rows.forEach(r => {
@@ -355,7 +357,7 @@ function loadDataFromDB() {
       if (!wrapper) return;
 
       const table = wrapper.querySelector("table");
-      const dt = $(table).DataTable();
+      const dt = dataTablesMap[sheetName];
       dt.clear();
 
       records.forEach(rec => {
@@ -388,7 +390,7 @@ function switchSheet(sheetName) {
 
     if (isActive) {
       const table = wrapper.querySelector('table');
-      const dataTable = $(table).DataTable();
+      const dataTable = dataTablesMap[sheetName];
 
       // CRITICAL: force DataTables to recalc columns
       dataTable.columns.adjust().draw(false);
@@ -422,6 +424,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

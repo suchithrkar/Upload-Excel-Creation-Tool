@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f9;
+  color: #222;
+}
+
+header {
+  background: #005f9e;
+  color: #fff;
+  padding: 14px 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.container {
+  padding: 20px;
+}
+
+.upload-box {
+  margin-bottom: 20px;
+}
+
+input[type="file"] {
+  padding: 6px;
+  font-size: 14px;
+}
+
+.sheet-block {
+  margin-bottom: 40px;
+}
+
+.sheet-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 20px 0 10px;
+}
+
+table.dataTable {
+  width: 100% !important;
+  background: #fff;
+}

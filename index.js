@@ -1,4 +1,6 @@
-let selectedFile = null;
+let kciFile = null;
+let csoFile = null;
+let trackingFile = null;
 let workbookCache = null;
 let tablesMap = {};
 const dataTablesMap = {};
@@ -232,36 +234,83 @@ function normalizeRowToSchema(row, sheetName) {
   return normalized;
 }
 
-document.getElementById('excelInput').addEventListener('change', function (e) {
-  selectedFile = e.target.files[0];
-  if (!selectedFile) return;
+document.getElementById('kciInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  document.getElementById('processBtn').disabled = false;
-  document.getElementById('statusText').textContent = 'File selected. Ready to process.';
+  if (!file.name.startsWith("KCI - Open Repair Case Data")) {
+    alert("Invalid file. Please upload 'KCI - Open Repair Case Data' file.");
+    e.target.value = "";
+    return;
+  }
+
+  kciFile = file;
+  enableProcessIfReady();
 });
 
-document.getElementById('processBtn').addEventListener('click', function () {
-  if (!selectedFile) return;
+document.getElementById('csoInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const statusText = document.getElementById('statusText');
-  const progressBar = document.getElementById('progressBar');
-  const progressContainer = document.getElementById('progressBarContainer');
+  if (!/^GNPro_Case_CSO_Status_\d{4}-\d{2}-\d{2}/.test(file.name)) {
+    alert("Invalid GNPro CSO file name.");
+    e.target.value = "";
+    return;
+  }
 
-  statusText.textContent = 'Processing Excel...';
-  progressContainer.style.display = 'block';
-  progressBar.style.width = '0%';
-
-  const reader = new FileReader();
-
-  reader.onload = function (evt) {
-    const data = new Uint8Array(evt.target.result);
-    workbookCache = XLSX.read(data, { type: 'array' });
-
-    buildSheetTables(workbookCache);
-  };
-
-  reader.readAsArrayBuffer(selectedFile);
+  csoFile = file;
+  enableProcessIfReady();
 });
+
+document.getElementById('trackingInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!/^Tracking_Results_\d{4}-\d{2}-\d{2}/.test(file.name)) {
+    alert("Invalid Tracking Results file name.");
+    e.target.value = "";
+    return;
+  }
+
+  trackingFile = file;
+  enableProcessIfReady();
+});
+
+document.getElementById('processBtn').addEventListener('click', async function () {
+  document.getElementById('progressBarContainer').style.display = 'block';
+  document.getElementById('progressBar').style.width = '0%';
+
+  if (kciFile) {
+    await processExcelFile(
+      kciFile,
+      ["Dump", "WO", "MO", "MO Items", "SO", "Closed Cases"]
+    );
+    kciFile = null;
+    document.getElementById('kciInput').value = "";
+  }
+
+  if (csoFile) {
+    await processExcelFile(csoFile, ["CSO Status"]);
+    csoFile = null;
+    document.getElementById('csoInput').value = "";
+  }
+
+  if (trackingFile) {
+    await processExcelFile(trackingFile, ["Delivery Details"]);
+    trackingFile = null;
+    document.getElementById('trackingInput').value = "";
+  }
+
+  document.getElementById('statusText').textContent = "Upload processed successfully.";
+  document.getElementById('processBtn').disabled = true;
+});
+
+function enableProcessIfReady() {
+  if (kciFile || csoFile || trackingFile) {
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('statusText').textContent = "Files ready to process.";
+  }
+}
 
 function buildSheetTables(workbook) {
 
@@ -335,6 +384,27 @@ function buildSheetTables(workbook) {
   })();
 }
 
+function processExcelFile(file, allowedSheets) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+
+    reader.onload = function (evt) {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const filteredWorkbook = {
+        SheetNames: workbook.SheetNames.filter(s => allowedSheets.includes(s)),
+        Sheets: workbook.Sheets
+      };
+
+      buildSheetTables(filteredWorkbook);
+      resolve();
+    };
+
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 function loadDataFromDB() {
   const store = getStore("readonly");
   const request = store.getAll();
@@ -403,6 +473,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

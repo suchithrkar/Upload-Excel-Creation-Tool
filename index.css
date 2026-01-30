@@ -19,9 +19,9 @@ header {
 
 /* ===== CONTENT AREA ===== */
 .container {
-  background: #f2f2f2;               /* Light workspace */
-  color: #1f1f1f;
-  padding: 20px;
+  background: var(--bg-main);
+  color: var(--text-main);
+  padding: 0; /* IMPORTANT */
   min-height: calc(100vh - 64px);
 }
 
@@ -120,6 +120,7 @@ table.dataTable thead th {
   letter-spacing: 0.4px;
   border-bottom: 1px solid #cfcfcf;
   padding: 6px 8px;
+  white-space: nowrap;
 }
 
 /* TABLE BODY */
@@ -139,3 +140,4 @@ table.dataTable tbody td {
   font-size: 12px;
   padding: 3px;
 }
+

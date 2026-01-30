@@ -86,74 +86,78 @@ function buildSheetTables(workbook) {
   const sheetNames = workbook.SheetNames;
   let processed = 0;
 
-  sheetNames.forEach((sheetName, index) => {
-    const sheet = workbook.Sheets[sheetName];
-    const json = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
-
-    if (json.length === 0) return;
-
-    // IGNORE columns A, B, C
-    const headers = json[0].slice(3).map(h => cleanCell(h));
-    const rows = json.slice(1).map(row =>
-      row.slice(3).map(cell => {
-        if (typeof cell === 'number' && cell > 40000 && cell < 60000) {
-          try {
-            return formatDate(excelDateToJSDate(cell));
-          } catch {
-            return cleanCell(cell);
+  (async function processSheets() {
+    for (let index = 0; index < sheetNames.length; index++) {
+      const sheetName = sheetNames[index];
+      await new Promise(requestAnimationFrame);
+  
+      const sheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+  
+      if (json.length === 0) continue;
+  
+      const headers = json[0].slice(3).map(h => cleanCell(h));
+      const rows = json.slice(1).map(row =>
+        row.slice(3).map(cell => {
+          if (typeof cell === 'number' && cell > 40000 && cell < 60000) {
+            try {
+              return formatDate(excelDateToJSDate(cell));
+            } catch {
+              return cleanCell(cell);
+            }
           }
-        }
-        return cleanCell(cell);
-      })
-    );
-
-    const tableWrapper = document.createElement('div');
-    tableWrapper.style.display = index === 0 ? 'block' : 'none';
-    tableWrapper.dataset.sheet = sheetName;
-
-    const table = document.createElement('table');
-    table.className = 'display';
-
-    const thead = document.createElement('thead');
-    const tr = document.createElement('tr');
-    headers.forEach(h => {
-      const th = document.createElement('th');
-      th.textContent = h;
-      tr.appendChild(th);
-    });
-    thead.appendChild(tr);
-    table.appendChild(thead);
-
-    const tbody = document.createElement('tbody');
-    rows.forEach(r => {
-      const rowTr = document.createElement('tr');
-      r.forEach(c => {
-        const td = document.createElement('td');
-        td.textContent = c || '';
-        rowTr.appendChild(td);
+          return cleanCell(cell);
+        })
+      );
+  
+      const tableWrapper = document.createElement('div');
+      tableWrapper.style.display = index === 0 ? 'block' : 'none';
+      tableWrapper.dataset.sheet = sheetName;
+  
+      const table = document.createElement('table');
+      table.className = 'display';
+  
+      const thead = document.createElement('thead');
+      const tr = document.createElement('tr');
+      headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        tr.appendChild(th);
       });
-      tbody.appendChild(rowTr);
-    });
-    table.appendChild(tbody);
-
-    tableWrapper.appendChild(table);
-    container.appendChild(tableWrapper);
-
-    $(table).DataTable({ pageLength: 25, scrollX: true });
-    tablesMap[sheetName] = tableWrapper;
-
-    const tab = document.createElement('div');
-    tab.className = 'sheet-tab' + (index === 0 ? ' active' : '');
-    tab.textContent = sheetName;
-    tab.onclick = () => switchSheet(sheetName);
-    tabsDiv.appendChild(tab);
-
-    processed++;
-    const percent = Math.round((processed / sheetNames.length) * 100);
-    progressBar.style.width = percent + '%';
-  });
-
-  statusText.textContent = 'Processing complete';
+      thead.appendChild(tr);
+      table.appendChild(thead);
+  
+      const tbody = document.createElement('tbody');
+      rows.forEach(r => {
+        const rowTr = document.createElement('tr');
+        r.forEach(c => {
+          const td = document.createElement('td');
+          td.textContent = c || '';
+          rowTr.appendChild(td);
+        });
+        tbody.appendChild(rowTr);
+      });
+      table.appendChild(tbody);
+  
+      tableWrapper.appendChild(table);
+      container.appendChild(tableWrapper);
+  
+      $(table).DataTable({ pageLength: 25, scrollX: true });
+      tablesMap[sheetName] = tableWrapper;
+  
+      const tab = document.createElement('div');
+      tab.className = 'sheet-tab' + (index === 0 ? ' active' : '');
+      tab.textContent = sheetName;
+      tab.onclick = () => switchSheet(sheetName);
+      tabsDiv.appendChild(tab);
+  
+      processed++;
+      const percent = Math.round((processed / sheetNames.length) * 100);
+      progressBar.style.width = percent + '%';
+    }
+  
+    statusText.textContent = 'Processing complete';
+  })();
 }
 
 function switchSheet(sheetName) {
@@ -165,5 +169,6 @@ function switchSheet(sheetName) {
     tablesMap[name].style.display = name === sheetName ? 'block' : 'none';
   });
 }
+
 
 

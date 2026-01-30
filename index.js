@@ -289,10 +289,22 @@ function switchSheet(sheetName) {
 
 document.addEventListener('DOMContentLoaded', initEmptyTables);
 
+const themeToggle = document.getElementById('themeToggle');
 
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('kci-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+}
 
+themeToggle.addEventListener('click', () => {
+  const current = document.body.getAttribute('data-theme') || 'dark';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+});
 
-
+// Init theme on load
+const savedTheme = localStorage.getItem('kci-theme') || 'dark';
+setTheme(savedTheme);
 
 
 

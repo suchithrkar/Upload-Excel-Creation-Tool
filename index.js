@@ -320,7 +320,8 @@ function buildSheetTables(workbook) {
         const safeRow = normalizeRowToSchema(row, sheetName);
         
         if (Array.isArray(existing[sheetName])) {
-          existing[sheetName].push(safeRow);
+          // Replace entire array for this upload cycle
+          existing[sheetName] = [safeRow];
         } else if (existing[sheetName]) {
           existing[sheetName] = safeRow;
         } else {
@@ -417,6 +418,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

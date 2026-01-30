@@ -510,6 +510,87 @@ function switchSheet(sheetName) {
   });
 }
 
+function normalizeText(val) {
+  return String(val || "").trim().toLowerCase();
+}
+
+function stripOrderSuffix(orderId) {
+  return String(orderId || "").replace(/-0\d$/, "");
+}
+
+async function buildCopySOOrders() {
+  const store = getStore("readonly");
+  const allData = await new Promise(res => {
+    const req = store.getAll();
+    req.onsuccess = () => res(req.result);
+  });
+
+  const dump = allData.find(r => r.sheetName === "Dump")?.rows || [];
+  const so = allData.find(r => r.sheetName === "SO")?.rows || [];
+  const cso = allData.find(r => r.sheetName === "CSO Status")?.rows || [];
+
+  const dumpIdx = TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
+  const dumpCaseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
+
+  const soCaseIdx = TABLE_SCHEMAS["SO"].indexOf("Case ID");
+  const soDateIdx = TABLE_SCHEMAS["SO"].indexOf("Date and Time Submitted");
+  const soOrderIdx = TABLE_SCHEMAS["SO"].indexOf("Order Reference ID");
+
+  const csoCaseIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Case ID");
+  const csoStatusIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Status");
+
+  // Step 1: Offsite cases
+  const offsiteCases = dump
+    .filter(r => normalizeText(r[dumpIdx]) === "offsite solution")
+    .map(r => r[dumpCaseIdx]);
+
+  const result = [];
+
+  offsiteCases.forEach(caseId => {
+    const soRows = so.filter(r => r[soCaseIdx] === caseId);
+    if (!soRows.length) return; // skip if no SO
+
+    // latest SO by date
+    const latest = soRows.sort((a, b) =>
+      normalizeText(b[soDateIdx]).localeCompare(normalizeText(a[soDateIdx]))
+    )[0];
+
+    let orderId = stripOrderSuffix(latest[soOrderIdx]);
+    if (!orderId) return;
+
+    const csoRow = cso.find(r => r[csoCaseIdx] === caseId);
+    if (csoRow) {
+      const status = normalizeText(csoRow[csoStatusIdx]);
+      if (
+        status === "delivered" ||
+        status === "order cancelled, not to be reopened"
+      ) {
+        return; // exclude
+      }
+    }
+
+    result.push(`${caseId},${orderId}`);
+  });
+
+  return result.join("\n");
+}
+
+document.getElementById("copySoBtn").addEventListener("click", async () => {
+  const output = await buildCopySOOrders();
+  document.getElementById("soOutput").value = output || "No eligible cases found.";
+  document.getElementById("soModal").style.display = "flex";
+});
+
+document.getElementById("closeModalBtn").addEventListener("click", () => {
+  document.getElementById("soModal").style.display = "none";
+});
+
+document.getElementById("copyToClipboardBtn").addEventListener("click", async () => {
+  const text = document.getElementById("soOutput").value;
+  await navigator.clipboard.writeText(text);
+  alert("Copied to clipboard");
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
   await openDB();
   initEmptyTables();
@@ -536,6 +617,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

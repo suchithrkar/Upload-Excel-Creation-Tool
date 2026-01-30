@@ -205,6 +205,19 @@ function formatDate(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function normalizeRowToSchema(row, sheetName) {
+  const headers = TABLE_SCHEMAS[sheetName];
+  const normalized = new Array(headers.length).fill("");
+
+  for (let i = 0; i < headers.length; i++) {
+    if (row && row[i] !== undefined) {
+      normalized[i] = row[i];
+    }
+  }
+
+  return normalized;
+}
+
 document.getElementById('excelInput').addEventListener('change', function (e) {
   selectedFile = e.target.files[0];
   if (!selectedFile) return;
@@ -304,13 +317,15 @@ function buildSheetTables(workbook) {
         getReq.onsuccess = function () {
           const existing = getReq.result || { caseId };
       
-          if (Array.isArray(existing[sheetName])) {
-            existing[sheetName].push(row);
-          } else if (existing[sheetName]) {
-            existing[sheetName] = row;
-          } else {
-            existing[sheetName] = row;
-          }
+        const safeRow = normalizeRowToSchema(row, sheetName);
+        
+        if (Array.isArray(existing[sheetName])) {
+          existing[sheetName].push(safeRow);
+        } else if (existing[sheetName]) {
+          existing[sheetName] = safeRow;
+        } else {
+          existing[sheetName] = safeRow;
+        }
       
           existing.lastUpdated = new Date().toISOString();
           store.put(existing);
@@ -346,9 +361,11 @@ function loadDataFromDB() {
         if (!rec[sheetName]) return;
 
         if (Array.isArray(rec[sheetName])) {
-          rec[sheetName].forEach(row => dt.row.add(row));
+          rec[sheetName].forEach(row => {
+            dt.row.add(normalizeRowToSchema(row, sheetName));
+          });
         } else {
-          dt.row.add(rec[sheetName]);
+          dt.row.add(normalizeRowToSchema(rec[sheetName], sheetName));
         }
       });
 
@@ -400,6 +417,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

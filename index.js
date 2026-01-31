@@ -593,17 +593,20 @@ async function processGNProCSOFile(file) {
     }
 
     const csvRow = gnproMap.get(caseId);
+    let repairStatus = "";
+    
     if (csvRow) {
       status = csvRow.status;
       tracking = csvRow.tracking;
+      repairStatus = csvRow.repairStatus || "";
     }
-
+    
     finalRows.push([
       caseId,
       cso,
       status,
       tracking,
-      csvRow.repairStatus || ""
+      repairStatus
     ]);
   });
 
@@ -1192,6 +1195,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

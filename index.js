@@ -639,7 +639,8 @@ function loadDataFromDB() {
 
       dt.clear();
       record.rows.forEach(row => {
-        dt.row.add(["", ...row]); // S.No placeholder
+        const normalized = normalizeRowToSchema(row, sheetName);
+        dt.row.add(["", ...normalized]); // S.No placeholder
       });
       dt.draw(false);
     });
@@ -1195,6 +1196,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

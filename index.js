@@ -165,6 +165,14 @@ function openDB() {
   });
 }
 
+function openModal(id) {
+  document.getElementById(id).style.display = 'flex';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
 function getStore(mode = "readonly") {
   const tx = db.transaction(STORE_NAME, mode);
   return tx.objectStore(STORE_NAME);
@@ -1185,6 +1193,145 @@ document.getElementById("saveSbdBtn").onclick = saveSbdData;
 document.getElementById("closeSbdBtn").onclick =
   () => document.getElementById("sbdModal").style.display = "none";
 
+function renderTLModal(data = []) {
+  const container = document.getElementById("tlContainer");
+  container.innerHTML = "";
+
+  data.forEach(tl => addTLBlock(tl.name, tl.agents));
+}
+
+function addTLBlock(name = "", agents = []) {
+  const container = document.getElementById("tlContainer");
+
+  const block = document.createElement("div");
+  block.className = "mapping-block";
+
+  block.innerHTML = `
+    <h4>
+      TL: <input value="${name}">
+      <button onclick="this.closest('.mapping-block').remove()">✕</button>
+    </h4>
+    <div class="agents"></div>
+    <button class="add-btn">+ Add Agent</button>
+  `;
+
+  const agentsDiv = block.querySelector(".agents");
+  const addAgentBtn = block.querySelector(".add-btn");
+
+  function addAgent(val = "") {
+    const row = document.createElement("div");
+    row.className = "mapping-row";
+    row.innerHTML = `
+      <input value="${val}">
+      <button onclick="this.parentElement.remove()">✕</button>
+    `;
+    agentsDiv.appendChild(row);
+  }
+
+  agents.forEach(addAgent);
+  addAgentBtn.onclick = () => addAgent();
+
+  container.appendChild(block);
+}
+
+function renderMarketModal(data = []) {
+  const container = document.getElementById("marketContainer");
+  container.innerHTML = "";
+
+  data.forEach(m => addMarketBlock(m.name, m.countries));
+}
+
+function addMarketBlock(name = "", countries = []) {
+  const container = document.getElementById("marketContainer");
+
+  const block = document.createElement("div");
+  block.className = "mapping-block";
+
+  block.innerHTML = `
+    <h4>
+      Market: <input value="${name}">
+      <button onclick="this.closest('.mapping-block').remove()">✕</button>
+    </h4>
+    <div class="countries"></div>
+    <button class="add-btn">+ Add Country</button>
+  `;
+
+  const div = block.querySelector(".countries");
+  const addBtn = block.querySelector(".add-btn");
+
+  function addCountry(val = "") {
+    const row = document.createElement("div");
+    row.className = "mapping-row";
+    row.innerHTML = `
+      <input value="${val}">
+      <button onclick="this.parentElement.remove()">✕</button>
+    `;
+    div.appendChild(row);
+  }
+
+  countries.forEach(addCountry);
+  addBtn.onclick = () => addCountry();
+
+  container.appendChild(block);
+}
+
+document.getElementById("saveTlBtn").onclick = () => {
+  const blocks = document.querySelectorAll("#tlContainer .mapping-block");
+  const data = [];
+
+  blocks.forEach(b => {
+    const name = b.querySelector("h4 input").value.trim();
+    if (!name) return;
+
+    const agents = [...b.querySelectorAll(".mapping-row input")]
+      .map(i => i.value.trim())
+      .filter(Boolean);
+
+    data.push({ name, agents });
+  });
+
+  getStore("readwrite").put({ sheetName: "TL_MAP", data });
+  closeModal("tlModal");
+};
+
+document.getElementById("saveMarketBtn").onclick = () => {
+  const blocks = document.querySelectorAll("#marketContainer .mapping-block");
+  const data = [];
+
+  blocks.forEach(b => {
+    const name = b.querySelector("h4 input").value.trim();
+    if (!name) return;
+
+    const countries = [...b.querySelectorAll(".mapping-row input")]
+      .map(i => i.value.trim())
+      .filter(Boolean);
+
+    data.push({ name, countries });
+  });
+
+  getStore("readwrite").put({ sheetName: "MARKET_MAP", data });
+  closeModal("marketModal");
+};
+
+document.getElementById("tlBtn").onclick = async () => {
+  const req = getStore().get("TL_MAP");
+  req.onsuccess = () => {
+    renderTLModal(req.result?.data || []);
+    openModal("tlModal");
+  };
+};
+
+document.getElementById("marketBtn").onclick = async () => {
+  const req = getStore().get("MARKET_MAP");
+  req.onsuccess = () => {
+    renderMarketModal(req.result?.data || []);
+    openModal("marketModal");
+  };
+};
+
+document.getElementById("addTlBtn").onclick = () => addTLBlock();
+document.getElementById("addMarketBtn").onclick = () => addMarketBlock();
+
 document.getElementById("copySoBtn").addEventListener("click", async () => {
   const output = await buildCopySOOrders();
 
@@ -1259,6 +1406,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

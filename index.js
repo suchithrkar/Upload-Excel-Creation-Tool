@@ -178,6 +178,10 @@ function initEmptyTables() {
   tabsDiv.className = 'sheet-tabs';
   container.appendChild(tabsDiv);
 
+  const rightTabsDiv = document.createElement('div');
+  rightTabsDiv.className = 'sheet-tabs-right';
+  tabsDiv.appendChild(rightTabsDiv);
+
   let first = true;
 
   Object.keys(TABLE_SCHEMAS).forEach(sheetName => {
@@ -240,10 +244,10 @@ function initEmptyTables() {
     
     // Right-aligned tabs
     if (sheetName === "Repair Cases" || sheetName === "Closed Cases Report") {
-      tab.classList.add("sheet-tab-right");
+      rightTabsDiv.appendChild(tab);
+    } else {
+      tabsDiv.appendChild(tab);
     }
-    
-    tabsDiv.appendChild(tab);
 
     first = false;
   });
@@ -1250,6 +1254,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

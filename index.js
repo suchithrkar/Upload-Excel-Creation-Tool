@@ -177,9 +177,14 @@ function initEmptyTables() {
   const tabsDiv = document.createElement('div');
   tabsDiv.className = 'sheet-tabs';
   container.appendChild(tabsDiv);
-
+  
+  const leftTabsDiv = document.createElement('div');
+  leftTabsDiv.className = 'sheet-tabs-left';
+  
   const rightTabsDiv = document.createElement('div');
   rightTabsDiv.className = 'sheet-tabs-right';
+  
+  tabsDiv.appendChild(leftTabsDiv);
   tabsDiv.appendChild(rightTabsDiv);
 
   let first = true;
@@ -246,7 +251,7 @@ function initEmptyTables() {
     if (sheetName === "Repair Cases" || sheetName === "Closed Cases Report") {
       rightTabsDiv.appendChild(tab);
     } else {
-      tabsDiv.appendChild(tab);
+      leftTabsDiv.appendChild(tab);
     }
 
     first = false;
@@ -1254,6 +1259,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

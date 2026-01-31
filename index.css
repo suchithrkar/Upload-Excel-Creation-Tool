@@ -390,4 +390,31 @@ table.dataTable tbody td {
   cursor: pointer;
 }
 
+/* ===== TL & MARKET MODAL SCROLL FIX ===== */
+
+/* Limit modal height like SBD */
+#tlModal .modal,
+#marketModal .modal {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollable content area */
+.tl-market-scroll {
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 8px;
+  flex: 1;
+}
+
+/* Hide scrollbar but keep scroll */
+.tl-market-scroll::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.tl-market-scroll {
+  scrollbar-width: none; /* Firefox */
+}
 

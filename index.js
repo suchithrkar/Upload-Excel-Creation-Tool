@@ -653,6 +653,17 @@ function normalizeText(val) {
   return String(val || "").trim().toLowerCase();
 }
 
+function getMOStatusPriority(status) {
+  const s = normalizeText(status);
+  if (s === "closed") return 1;
+  if (s === "pod") return 2;
+  if (s === "shipped") return 3;
+  if (s === "ordered") return 4;
+  if (s === "new") return 5;
+  if (s === "cancelled") return 6;
+  return 7;
+}
+
 async function buildCopySOOrders() {
   const store = getStore("readonly");
   const allData = await new Promise(res => {
@@ -716,6 +727,121 @@ async function buildCopySOOrders() {
   return result.join("\n");
 }
 
+async function buildCopyTrackingURLs() {
+  const store = getStore("readonly");
+  const allData = await new Promise(res => {
+    const req = store.getAll();
+    req.onsuccess = () => res(req.result);
+  });
+
+  const dump = allData.find(r => r.sheetName === "Dump")?.rows || [];
+  const mo = allData.find(r => r.sheetName === "MO")?.rows || [];
+  const moItems = allData.find(r => r.sheetName === "MO Items")?.rows || [];
+  const cso = allData.find(r => r.sheetName === "CSO Status")?.rows || [];
+  const delivery = allData.find(r => r.sheetName === "Delivery Details")?.rows || [];
+
+  const dumpCaseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
+  const dumpResIdx = TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
+
+  const moOrderIdx = TABLE_SCHEMAS["MO"].indexOf("Order Number");
+  const moCaseIdx = TABLE_SCHEMAS["MO"].indexOf("Case ID");
+  const moCreatedIdx = TABLE_SCHEMAS["MO"].indexOf("Created On");
+  const moStatusIdx = TABLE_SCHEMAS["MO"].indexOf("Order Status");
+
+  const moItemOrderIdx = TABLE_SCHEMAS["MO Items"].indexOf("Material Order");
+  const moItemNameIdx = TABLE_SCHEMAS["MO Items"].indexOf("MO Line Items Name");
+  const moItemUrlIdx = TABLE_SCHEMAS["MO Items"].indexOf("Tracking Url");
+
+  const csoCaseIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Case ID");
+  const csoStatusIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Status");
+  const csoTrackIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Tracking Number");
+
+  const delCaseIdx = TABLE_SCHEMAS["Delivery Details"].indexOf("CaseID");
+  const delStatusIdx = TABLE_SCHEMAS["Delivery Details"].indexOf("CurrentStatus");
+
+  // ---- Stage 1: MO based tracking (primary) ----
+  const partsShippedCases = [
+    ...new Set(
+      dump
+        .filter(r => normalizeText(r[dumpResIdx]) === "parts shipped")
+        .map(r => r[dumpCaseIdx])
+    )
+  ];
+
+  const trackingMap = new Map();
+
+  partsShippedCases.forEach(caseId => {
+    const caseMOs = mo.filter(r => r[moCaseIdx] === caseId);
+    if (!caseMOs.length) return;
+
+    // Sort by created date desc
+    caseMOs.sort((a, b) => new Date(b[moCreatedIdx]) - new Date(a[moCreatedIdx]));
+
+    const latestTime = new Date(caseMOs[0][moCreatedIdx]);
+
+    // 5-minute window
+    const windowMOs = caseMOs.filter(r =>
+      Math.abs(new Date(r[moCreatedIdx]) - latestTime) <= 5 * 60 * 1000
+    );
+
+    // Pick by status priority
+    windowMOs.sort(
+      (a, b) => getMOStatusPriority(a[moStatusIdx]) - getMOStatusPriority(b[moStatusIdx])
+    );
+
+    const selected = windowMOs[0];
+    const status = normalizeText(selected[moStatusIdx]);
+
+    if (status !== "closed" && status !== "pod") return;
+
+    const moNumber = selected[moOrderIdx];
+
+    const item = moItems.find(r =>
+      r[moItemOrderIdx] === moNumber &&
+      normalizeText(r[moItemNameIdx]).endsWith("- 1")
+    );
+
+    if (!item || !item[moItemUrlIdx]) return;
+
+    trackingMap.set(caseId, item[moItemUrlIdx]);
+  });
+
+  // ---- Stage 2: CSO delivered (secondary) ----
+  cso.forEach(r => {
+    const caseId = r[csoCaseIdx];
+    if (trackingMap.has(caseId)) return;
+
+    if (normalizeText(r[csoStatusIdx]) === "delivered") {
+      const tn = r[csoTrackIdx];
+      if (!tn) return;
+
+      const url =
+        "http://wwwapps.ups.com/WebTracking/processInputRequest" +
+        "?TypeOfInquiryNumber=T&InquiryNumber1=" + tn;
+
+      trackingMap.set(caseId, url);
+    }
+  });
+
+  // ---- Stage 3: remove processed cases ----
+  delivery.forEach(r => {
+    const caseId = r[delCaseIdx];
+    const status = normalizeText(r[delStatusIdx]);
+
+    if (
+      trackingMap.has(caseId) &&
+      status &&
+      status !== "no status found"
+    ) {
+      trackingMap.delete(caseId);
+    }
+  });
+
+  return [...trackingMap.entries()]
+    .map(([k, v]) => `${k} | ${v}`)
+    .join("\n");
+}
+
 document.getElementById("copySoBtn").addEventListener("click", async () => {
   const output = await buildCopySOOrders();
 
@@ -728,6 +854,25 @@ document.getElementById("copySoBtn").addEventListener("click", async () => {
 
   document.getElementById("soCount").textContent =
     `Total cases: ${lines.length}`;
+
+  document.getElementById("soModal").style.display = "flex";
+});
+
+document.getElementById("copyTrackingBtn").addEventListener("click", async () => {
+  const output = await buildCopyTrackingURLs();
+
+  const lines = output
+    ? output.split("\n").filter(l => l.trim())
+    : [];
+
+  document.getElementById("soOutput").value =
+    lines.length ? lines.join("\n") : "No eligible tracking URLs found.";
+
+  document.getElementById("soCount").textContent =
+    `Total cases: ${lines.length}`;
+
+  document.querySelector("#soModal h3").textContent =
+    "Copy Tracking URLs Preview";
 
   document.getElementById("soModal").style.display = "flex";
 });
@@ -768,6 +913,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

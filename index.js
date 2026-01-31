@@ -655,13 +655,17 @@ function normalizeText(val) {
 
 function getMOStatusPriority(status) {
   const s = normalizeText(status);
+
   if (s === "closed") return 1;
   if (s === "pod") return 2;
   if (s === "shipped") return 3;
   if (s === "ordered") return 4;
-  if (s === "new") return 5;
-  if (s === "cancelled") return 6;
-  return 7;
+  if (s === "partially ordered") return 5;
+  if (s === "order pending") return 6;
+  if (s === "new") return 7;
+  if (s === "cancelled") return 8;
+
+  return 9; // unknown / future statuses
 }
 
 async function buildCopySOOrders() {
@@ -916,6 +920,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

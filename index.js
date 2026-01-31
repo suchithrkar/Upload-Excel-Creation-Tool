@@ -987,6 +987,122 @@ async function processTrackingResultsFile(file) {
   });
 }
 
+function createEmptySbdData() {
+  return {
+    sheetName: "SBD Cut Off Times",
+    periods: Array.from({ length: 3 }, () => ({
+      startDate: "",
+      endDate: "",
+      rows: []
+    }))
+  };
+}
+
+function datesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart && aEnd && bStart && bEnd &&
+    !(aEnd < bStart || bEnd < aStart);
+}
+
+function renderSbdModal(data) {
+  const container = document.querySelector(".sbd-periods");
+  container.innerHTML = "";
+
+  data.periods.forEach((p, idx) => {
+    const div = document.createElement("div");
+    div.className = "sbd-period";
+
+    div.innerHTML = `
+      <h4>Period ${idx + 1}</h4>
+      <div class="sbd-dates">
+        <input type="date" class="sbd-start" value="${p.startDate}">
+        <input type="date" class="sbd-end" value="${p.endDate}">
+      </div>
+      <table class="sbd-table">
+        <thead>
+          <tr><th>Country</th><th>Cut Off Time</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="sbd-add">+ Add Row</div>
+    `;
+
+    const tbody = div.querySelector("tbody");
+
+    function addRow(row = { country: "", time: "" }) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input value="${row.country}"></td>
+        <td><input type="time" value="${row.time}"></td>
+        <td><button class="del">✕</button></td>
+      `;
+      tr.querySelector(".del").onclick = () => tr.remove();
+      tbody.appendChild(tr);
+    }
+
+    p.rows.forEach(addRow);
+    div.querySelector(".sbd-add").onclick = () => addRow();
+
+    container.appendChild(div);
+  });
+}
+
+async function saveSbdData() {
+  const periods = [];
+  const blocks = document.querySelectorAll(".sbd-period");
+
+  blocks.forEach(b => {
+    const startDate = b.querySelector(".sbd-start").value;
+    const endDate = b.querySelector(".sbd-end").value;
+
+    const rows = [];
+    b.querySelectorAll("tbody tr").forEach(tr => {
+      const country = tr.children[0].querySelector("input").value.trim();
+      const time = tr.children[1].querySelector("input").value;
+      if (country && time) rows.push({ country, time });
+    });
+
+    periods.push({ startDate, endDate, rows });
+  });
+
+  // Date overlap validation
+  for (let i = 0; i < periods.length; i++) {
+    for (let j = i + 1; j < periods.length; j++) {
+      if (datesOverlap(
+        periods[i].startDate,
+        periods[i].endDate,
+        periods[j].startDate,
+        periods[j].endDate
+      )) {
+        alert("Date ranges cannot overlap between periods.");
+        return;
+      }
+    }
+  }
+
+  const store = getStore("readwrite");
+  store.put({
+    sheetName: "SBD Cut Off Times",
+    periods
+  });
+
+  document.getElementById("sbdModal").style.display = "none";
+}
+
+document.getElementById("sbdBtn").onclick = async () => {
+  const store = getStore("readonly");
+  const req = store.get("SBD Cut Off Times");
+
+  req.onsuccess = () => {
+    const data = req.result || createEmptySbdData();
+    renderSbdModal(data);
+    document.getElementById("sbdModal").style.display = "flex";
+  };
+};
+
+document.getElementById("saveSbdBtn").onclick = saveSbdData;
+document.getElementById("closeSbdBtn").onclick =
+  () => document.getElementById("sbdModal").style.display = "none";
+
 document.getElementById("copySoBtn").addEventListener("click", async () => {
   const output = await buildCopySOOrders();
 
@@ -1061,6 +1177,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

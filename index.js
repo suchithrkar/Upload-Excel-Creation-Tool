@@ -855,6 +855,9 @@ document.getElementById("copySoBtn").addEventListener("click", async () => {
   document.getElementById("soCount").textContent =
     `Total cases: ${lines.length}`;
 
+  document.querySelector("#soModal h3").textContent =
+  "Copy SO Orders Preview";
+
   document.getElementById("soModal").style.display = "flex";
 });
 
@@ -913,6 +916,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

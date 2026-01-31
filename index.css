@@ -357,5 +357,37 @@ table.dataTable tbody td {
   scrollbar-width: none; /* Firefox */
 }
 
+/* TL / Market Modals */
+.add-btn {
+  margin: 10px 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.mapping-block {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.mapping-block h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.mapping-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.mapping-row input {
+  flex: 1;
+}
+
+.mapping-row button {
+  cursor: pointer;
+}
 
 

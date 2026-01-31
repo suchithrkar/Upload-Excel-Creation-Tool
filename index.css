@@ -307,3 +307,39 @@ table.dataTable tbody td {
   cursor: pointer;
 }
 
+/* ===== SBD TABLE SCROLL FIX ===== */
+
+/* Limit modal height so it never exceeds viewport */
+.sbd-modal {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Allow periods section to scroll if needed */
+.sbd-periods {
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scroll container for table body */
+.sbd-tbody-scroll {
+  max-height: 260px; /* ~10 rows */
+  overflow-y: auto;
+}
+
+/* Keep table width aligned */
+.sbd-tbody-scroll .sbd-table {
+  width: 100%;
+  border-top: none;
+}
+
+/* Hide scrollbar but keep scrolling */
+.sbd-tbody-scroll::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.sbd-tbody-scroll {
+  scrollbar-width: none; /* Firefox */
+}

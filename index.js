@@ -91,6 +91,49 @@ const TABLE_SCHEMAS = {
   "Delivery Details": [
     "CaseID",
     "CurrentStatus"
+  ],
+
+  "Repair Cases": [
+    "Case ID",
+    "Customer Name",
+    "Created On",
+    "Created By",
+    "Country",
+    "Case Resolution Code",
+    "Case Owner",
+    "OTC Code",
+    "CA Group",
+    "TL",
+    "SBD",
+    "Onsite RFC",
+    "CSR RFC",
+    "Bench RFC",
+    "Market",
+    "WO Closure Notes",
+    "Tracking Status",
+    "Part Number",
+    "Part Name",
+    "Serial Number",
+    "Product Name",
+    "Email Status"
+  ],
+
+  "Closed Cases Report": [
+    "Case ID",
+    "Customer Name",
+    "Created On",
+    "Created By",
+    "Modified By",
+    "Modified On",
+    "Case Closed Date",
+    "Closed By",
+    "Country",
+    "Case Resolution Code",
+    "Case Owner",
+    "OTC Code",
+    "TL",
+    "SBD",
+    "Market"
   ]
 };
 
@@ -194,6 +237,12 @@ function initEmptyTables() {
     tab.className = 'sheet-tab' + (first ? ' active' : '');
     tab.textContent = sheetName;
     tab.onclick = () => switchSheet(sheetName);
+    
+    // Right-aligned tabs
+    if (sheetName === "Repair Cases" || sheetName === "Closed Cases Report") {
+      tab.classList.add("sheet-tab-right");
+    }
+    
     tabsDiv.appendChild(tab);
 
     first = false;
@@ -1201,6 +1250,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

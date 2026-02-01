@@ -274,7 +274,13 @@ function initEmptyTables() {
       pageLength: 25,
       autoWidth: true,
       columnDefs,
-      order: [[1, 'asc']]
+      order: [[1, 'asc']],
+    
+      // ⬇️ IMPORTANT: move controls OUTSIDE scroll area
+      dom:
+        "<'dt-top'l f>" +
+        "<'dt-table-wrapper't>" +
+        "<'dt-bottom'i p>"
     });
     attachSerialNumber(dt);
 
@@ -1855,6 +1861,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

@@ -107,9 +107,9 @@ input[type="file"] {
 
 /* ===== SHEET TABS ===== */
 .sheet-tabs {
-  margin-bottom: 10px;
   display: flex;
   align-items: center;
+  padding: 12px 16px;
 }
 
 .sheet-tabs-left {
@@ -132,6 +132,11 @@ input[type="file"] {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* Remove right margin for last tab */
+.sheet-tabs .sheet-tab:last-child {
+  margin-right: 0;
 }
 
 .sheet-tab.active {
@@ -204,7 +209,6 @@ table.dataTable tbody td {
   background: var(--bg-card);
   border: 1px solid #d6d6d6;
   padding: 12px 16px;
-  margin-bottom: 16px;
   display: flex;
   gap: 12px;
 }
@@ -429,11 +433,13 @@ table.dataTable th.fixed-notes-col {
 /* ===== DATATABLE HORIZONTAL SCROLL (TABLE ONLY) ===== */
 
 /* --- DataTables layout --- */
-.dt-top {
+.dt-top,
+.dt-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 6px 0;
+  margin: 0;
+  padding: 12px 16px;
 }
 
 .dt-middle {
@@ -456,15 +462,9 @@ table.dataTable th.fixed-notes-col {
   scrollbar-width: none;
 }
 
-.dt-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 6px 0;
-}
-
 /* Prevent any accidental inline width causing overflow */
 table.dataTable th {
   box-sizing: border-box;
 }
+
 

@@ -428,36 +428,36 @@ table.dataTable th.fixed-notes-col {
 
 /* ===== DATATABLE HORIZONTAL SCROLL (TABLE ONLY) ===== */
 
-/* Controls layout */
-.dt-top,
-.dt-bottom {
+/* --- DataTables layout --- */
+.dt-top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   margin: 6px 0;
 }
 
-/* Push pagination right */
-.dt-bottom {
-  justify-content: space-between;
-}
-
-/* ONLY table scrolls horizontally */
-.dt-table-only-wrapper {
+.dt-middle {
   overflow-x: auto;
 }
 
-/* Expand table naturally */
-.dt-table-only-wrapper table {
+.dt-middle table {
   min-width: max-content;
 }
 
-/* Hide horizontal scrollbar */
-.dt-table-only-wrapper::-webkit-scrollbar {
+/* Hide horizontal scrollbar but keep scroll */
+.dt-middle::-webkit-scrollbar {
   height: 0;
   background: transparent;
 }
 
-.dt-table-only-wrapper {
+.dt-middle {
   scrollbar-width: none;
 }
+
+.dt-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0;
+}
+

@@ -706,7 +706,7 @@ table.dataTable th {
 #tlContainer,
 #marketContainer {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 320px); /* 🔥 real column width */
   gap: 12px;
 }
 
@@ -728,6 +728,15 @@ table.dataTable th {
   #marketContainer {
     grid-template-columns: 1fr;
   }
+}
+
+/* ===== DYNAMIC WIDTH FOR TL & MARKET MODALS ===== */
+
+/* Allow modal to expand based on grid content */
+#tlModal .modal,
+#marketModal .modal {
+  width: fit-content;              /* 🔥 content-driven width */
+  max-width: calc(100vw - 80px);   /* viewport safety */
 }
 
 

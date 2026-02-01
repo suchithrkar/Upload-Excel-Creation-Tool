@@ -276,12 +276,49 @@ function initEmptyTables() {
       columnDefs,
       order: [[1, 'asc']],
     
-      // ⬇️ IMPORTANT: move controls OUTSIDE scroll area
-      dom:
-        "<'dt-top'l f>" +
-        "<'dt-table-wrapper't>" +
-        "<'dt-bottom'i p>"
+      dom: 'lfrtip'
     });
+
+    // ---- Move DataTables controls OUTSIDE horizontal scroll ----
+    const wrapper = table.closest('.dataTables_wrapper');
+    const scrollWrapper = tableWrapper; // your existing table-scroll-wrapper
+    
+    const dtTop = wrapper.querySelector('.dataTables_length')?.parentElement;
+    const dtFilter = wrapper.querySelector('.dataTables_filter');
+    const dtInfo = wrapper.querySelector('.dataTables_info');
+    const dtPaginate = wrapper.querySelector('.dataTables_paginate');
+    
+    // Create containers if not already created
+    let topControls = scrollWrapper.querySelector('.dt-top');
+    if (!topControls) {
+      topControls = document.createElement('div');
+      topControls.className = 'dt-top';
+      scrollWrapper.prepend(topControls);
+    }
+    
+    let bottomControls = scrollWrapper.querySelector('.dt-bottom');
+    if (!bottomControls) {
+      bottomControls = document.createElement('div');
+      bottomControls.className = 'dt-bottom';
+      scrollWrapper.appendChild(bottomControls);
+    }
+    
+    // Move controls
+    if (dtTop) topControls.appendChild(dtTop);
+    if (dtFilter) topControls.appendChild(dtFilter);
+    if (dtInfo) bottomControls.appendChild(dtInfo);
+    if (dtPaginate) bottomControls.appendChild(dtPaginate);
+    
+    // Wrap ONLY the table for horizontal scrolling
+    const tableOnlyWrapper = document.createElement('div');
+    tableOnlyWrapper.className = 'dt-table-only-wrapper';
+    
+    wrapper.querySelector('table').replaceWith(tableOnlyWrapper);
+    tableOnlyWrapper.appendChild(table);
+    
+    // Remove empty DataTables wrapper
+    wrapper.replaceWith(...wrapper.childNodes);
+    
     attachSerialNumber(dt);
 
     dataTablesMap[sheetName] = dt;
@@ -1861,6 +1898,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

@@ -121,7 +121,6 @@ const TABLE_SCHEMAS = {
 
   "Closed Cases Report": [
     "Case ID",
-    "Customer Name",
     "Created On",
     "Created By",
     "Modified By",
@@ -1407,6 +1406,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

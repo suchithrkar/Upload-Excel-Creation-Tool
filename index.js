@@ -291,6 +291,11 @@ function initEmptyTables() {
       columnDefs,
       order: [[1, 'asc']],
     
+      fixedHeader: {
+        header: true,
+        headerOffset: 98   // sheet-tabs (48) + dt-top (50)
+      },
+    
       dom:
         "<'dt-top'l f>" +
         "<'dt-middle't>" +
@@ -1876,6 +1881,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

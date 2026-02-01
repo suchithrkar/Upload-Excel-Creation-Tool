@@ -1343,7 +1343,7 @@ function renderSbdModal(data) {
     div.className = "sbd-period";
 
     div.innerHTML = `
-      <h4>Period ${idx + 1}</h4>
+      <h4>Date Period ${idx + 1}</h4>
       <div class="sbd-dates">
         <input type="date" class="sbd-start" value="${p.startDate}">
         <input type="date" class="sbd-end" value="${p.endDate}">
@@ -1881,6 +1881,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

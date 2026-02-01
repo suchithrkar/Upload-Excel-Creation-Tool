@@ -637,3 +637,70 @@ table.dataTable th {
   border-bottom: 1px solid #e0e0e0;
   padding-bottom: 6px;
 }
+
+/* ===== SBD TABLE ALIGNMENT FIX ===== */
+
+/* Force both header & body tables to behave identically */
+.sbd-table {
+  table-layout: fixed;   /* 🔥 KEY FIX */
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Explicit column widths */
+.sbd-table th:nth-child(1),
+.sbd-table td:nth-child(1) {
+  width: 55%;
+}
+
+.sbd-table th:nth-child(2),
+.sbd-table td:nth-child(2) {
+  width: 30%;
+}
+
+.sbd-table th:nth-child(3),
+.sbd-table td:nth-child(3) {
+  width: 15%;
+  text-align: center;
+}
+
+/* Inputs must respect cell width */
+.sbd-table td input {
+  width: 100%;
+  box-sizing: border-box;  /* 🔥 PREVENT OVERFLOW */
+}
+
+/* Center Period headers */
+.sbd-period h4 {
+  text-align: center;
+}
+
+/* Remove extra top spacing inside SBD cards */
+.sbd-period {
+  padding-top: 6px;   /* was visually too large */
+}
+
+.sbd-period h4 {
+  margin: 4px 0 8px;   /* balanced vertical spacing */
+  padding-bottom: 6px;
+}
+
+/* Center delete button properly */
+.sbd-table td button.del {
+  padding: 2px 6px;
+  line-height: 1;
+  font-size: 13px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

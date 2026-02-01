@@ -84,6 +84,13 @@ input[type="file"] {
 }
 
 /* ===== STATUS / PROGRESS ===== */
+.emptyContainer {
+  width: 100%;
+  margin-top: 6px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
 #statusText {
   width: 100%;
   margin-top: 6px;
@@ -505,6 +512,7 @@ table.dataTable th.fixed-notes-col {
 table.dataTable th {
   box-sizing: border-box;
 }
+
 
 
 

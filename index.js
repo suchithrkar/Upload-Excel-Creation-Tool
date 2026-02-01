@@ -179,6 +179,12 @@ function getStore(mode = "readonly") {
   return tx.objectStore(STORE_NAME);
 }
 
+function getColumnIndex(sheetName, columnName) {
+  const headers = TABLE_SCHEMAS[sheetName];
+  return headers ? headers.indexOf(columnName) + 1 : -1;
+  // +1 because DataTables has S.No as column 0
+}
+
 function initEmptyTables() {
   const container = document.getElementById('tablesContainer');
   container.innerHTML = '';
@@ -233,16 +239,29 @@ function initEmptyTables() {
     tableWrapper.appendChild(table);
     container.appendChild(tableWrapper);
 
+    const columnDefs = [
+      {
+        targets: 0,
+        searchable: false,
+        orderable: false
+      }
+    ];
+    
+    // Apply fixed width ONLY for Resolution Notes/ Diagnostics
+    if (sheetName === "WO" || sheetName === "Repair Cases") {
+      const idx = getColumnIndex(sheetName, "Resolution Notes/ Diagnostics");
+      if (idx !== -1) {
+        columnDefs.push({
+          targets: idx,
+          width: "300px"
+        });
+      }
+    }
+    
     const dt = $(table).DataTable({
       pageLength: 25,
       autoWidth: true,
-      columnDefs: [
-        {
-          targets: 0,
-          searchable: false,
-          orderable: false
-        }
-      ],
+      columnDefs,
       order: [[1, 'asc']]
     });
     attachSerialNumber(dt);
@@ -1824,6 +1843,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

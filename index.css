@@ -511,19 +511,129 @@ table.dataTable th {
   box-sizing: border-box;
 }
 
+/* ===== POLISHED MODAL SYSTEM ===== */
 
+.modal-polished {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+}
 
+/* Modal size helpers */
+.modal-medium {
+  width: 640px;
+  max-width: 95%;
+}
 
+.modal-large {
+  width: 95%;
+  max-width: 1200px;
+}
 
+/* Header */
+.modal-polished > h3 {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  border-bottom: 1px solid #d6d6d6;
+  background: var(--bg-header);
+  color: #fff;
+}
 
+/* Body */
+.modal-polished .tl-market-scroll,
+.modal-polished .sbd-periods {
+  padding: 14px 16px;
+  flex: 1;
+}
 
+/* Footer */
+.modal-polished .modal-actions {
+  padding: 12px 16px;
+  border-top: 1px solid #d6d6d6;
+  background: var(--bg-card);
+  position: sticky;
+  bottom: 0;
+}
 
+/* ===== MODAL BUTTONS ===== */
 
+.modal-actions button,
+.add-btn {
+  background: #151923;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
+.modal-actions button:hover,
+.add-btn:hover {
+  opacity: 0.9;
+}
 
+/* ===== TL & MARKET CARD STYLE ===== */
 
+.mapping-block {
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #d6d6d6;
+}
 
+.mapping-block h4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
 
+.mapping-block h4 input {
+  font-weight: 600;
+}
 
+.mapping-block h4 button {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
 
+/* ===== INPUT POLISH ===== */
 
+.modal-polished input,
+.modal-polished textarea {
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+.modal-polished input:focus,
+.modal-polished textarea:focus {
+  outline: none;
+  border-color: #151923;
+}
+
+/* ===== SBD PERIOD CARD POLISH ===== */
+
+.sbd-period {
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #d6d6d6;
+}
+
+.sbd-period h4 {
+  font-weight: 700;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 6px;
+}

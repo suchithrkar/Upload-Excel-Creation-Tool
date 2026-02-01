@@ -22,39 +22,37 @@
 </header>
 
 <div class="container">
-  <div class="control-panel">
-    <div class="upload-box">
-      <div class="emptyContainer"></div>
-      <div class="upload-group">
-        <label for="kciInput">KCI – Open Repair Case Data (Excel)</label>
-        <input type="file" id="kciInput" accept=".xlsx" />
-      </div>
-      
-      <div class="upload-group">
-        <label for="csoInput">GNPro – CSO Status File (CSV)</label>
-        <input type="file" id="csoInput" accept=".csv" />
-      </div>
-      
-      <div class="upload-group">
-        <label for="trackingInput">Tracking Results File (CSV)</label>
-        <input type="file" id="trackingInput" accept=".csv" />
-      </div>
+  <div class="upload-box">
+    <div class="emptyContainer"></div>
+    <div class="upload-group">
+      <label for="kciInput">KCI – Open Repair Case Data (Excel)</label>
+      <input type="file" id="kciInput" accept=".xlsx" />
+    </div>
     
-    <button id="processBtn" disabled>Process Excel</button>
-      <div id="statusText"></div>
-      <div id="progressBarContainer">
-        <div id="progressBar"></div>
-      </div>
+    <div class="upload-group">
+      <label for="csoInput">GNPro – CSO Status File (CSV)</label>
+      <input type="file" id="csoInput" accept=".csv" />
+    </div>
+    
+    <div class="upload-group">
+      <label for="trackingInput">Tracking Results File (CSV)</label>
+      <input type="file" id="trackingInput" accept=".csv" />
     </div>
   
-    <div class="action-bar">
-      <button id="copySoBtn">Copy SO Orders</button>
-      <button id="copyTrackingBtn">Copy Tracking URLs</button>
-      <button id="sbdBtn">SBD Cut Off Times</button>
-      <button id="tlBtn">TL</button>
-      <button id="marketBtn">Market</button>
-      <button id="processRepairBtn">Process Repair Data</button>
+  <button id="processBtn" disabled>Process Excel</button>
+    <div id="statusText"></div>
+    <div id="progressBarContainer">
+      <div id="progressBar"></div>
     </div>
+  </div>
+
+  <div class="action-bar">
+    <button id="copySoBtn">Copy SO Orders</button>
+    <button id="copyTrackingBtn">Copy Tracking URLs</button>
+    <button id="sbdBtn">SBD Cut Off Times</button>
+    <button id="tlBtn">TL</button>
+    <button id="marketBtn">Market</button>
+    <button id="processRepairBtn">Process Repair Data</button>
   </div>
   
   <!-- Modal -->
@@ -132,7 +130,6 @@
 </body>
 
 </html>
-
 
 
 

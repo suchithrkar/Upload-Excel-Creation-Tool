@@ -418,3 +418,8 @@ table.dataTable tbody td {
   scrollbar-width: none; /* Firefox */
 }
 
+/* Allow wrapping for Resolution Notes / Diagnostics */
+table.dataTable td,
+table.dataTable th {
+  word-break: break-word;
+}

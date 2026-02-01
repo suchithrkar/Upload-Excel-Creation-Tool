@@ -778,6 +778,28 @@ function getMOStatusPriority(status) {
   return 9; // unknown / future statuses
 }
 
+function getLatestMO(caseId, mo) {
+  const caseMOs = mo.filter(r => r[1] === caseId);
+  if (!caseMOs.length) return null;
+
+  // Sort by Created On DESC
+  caseMOs.sort((a, b) => new Date(b[2]) - new Date(a[2]));
+  const latestTime = new Date(caseMOs[0][2]);
+
+  // 5-minute window
+  const windowMOs = caseMOs.filter(r =>
+    Math.abs(new Date(r[2]) - latestTime) <= 5 * 60 * 1000
+  );
+
+  // Priority sort
+  windowMOs.sort(
+    (a, b) =>
+      getMOStatusPriority(a[3]) - getMOStatusPriority(b[3])
+  );
+
+  return windowMOs[0];
+}
+
 function getFirstOrderDate(caseId, wo, mo, so) {
   const dates = [];
 
@@ -1500,8 +1522,7 @@ async function buildRepairCases() {
 
     const csrRFC =
       resolution === "parts shipped"
-        ? (mo.filter(m => m[1] === caseId)
-            .sort((a, b) => new Date(b[2]) - new Date(a[2]))[0]?.[3] || "")
+        ? (getLatestMO(caseId, mo)?.[3] || "")
         : "Not Found";
 
     const benchRFC =
@@ -1516,6 +1537,33 @@ async function buildRepairCases() {
         ? "True"
         : "";
 
+    let partNumber = "";
+    let partName = "";
+    
+    if (resolution === "parts shipped") {
+      const latestMO = getLatestMO(caseId, mo);
+    
+      if (latestMO) {
+        const moNumber = latestMO[0];
+    
+        const item = moItems.find(r =>
+          r[0] === moNumber &&
+          normalizeText(r[1]).endsWith("- 1")
+        );
+    
+        if (item) {
+          partNumber = item[2] || "";
+    
+          if (item[3]) {
+            const idx = item[3].indexOf("-");
+            partName = idx >= 0
+              ? item[3].substring(idx + 1).trim()
+              : item[3].trim();
+          }
+        }
+      }
+    }
+
     rows.push([
       caseId,
       d[1], d[2], d[3], d[6], d[8], d[9], d[14],
@@ -1527,10 +1575,18 @@ async function buildRepairCases() {
       benchRFC,
       market,
       onsiteRFC !== "Not Found"
-        ? wo.find(w => w[0] === caseId)?.[9] || ""
+        ? (
+            wo.filter(w => w[0] === caseId)
+              .sort((a, b) => new Date(b[6]) - new Date(a[6]))[0]
+              ?.[9] || ""
+          )
         : "",
       delivery.find(x => x[0] === caseId)?.[1] || "",
-      "", "", d[15], d[16], d[10],
+      partNumber,
+      partName,
+      d[15],
+      d[16],
+      d[10],
       dnap
     ]);
   });
@@ -1601,6 +1657,29 @@ async function buildClosedCasesReport() {
     lastUpdated: new Date().toISOString()
   });
 
+  // 🔴 Purge old closed cases from IndexedDB (older than 6 months)
+  const storeRW = getStore("readwrite");
+  const req = storeRW.get("Closed Cases Report");
+  
+  req.onsuccess = () => {
+    const record = req.result;
+    if (!record?.rows) return;
+  
+    const now = new Date();
+    const cutoff = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+  
+    const filtered = record.rows.filter(r => {
+      const closedDate = new Date(r[6]);
+      return closedDate >= cutoff;
+    });
+  
+    storeRW.put({
+      sheetName: "Closed Cases Report",
+      rows: filtered,
+      lastUpdated: new Date().toISOString()
+    });
+  };
+
   // Remove closed cases from Repair Cases
   const remaining = repair.filter(
     r => !rows.some(c => c[0] === r[0])
@@ -1642,6 +1721,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

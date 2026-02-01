@@ -412,6 +412,8 @@ function enableProcessIfReady() {
 }
 
 let progressContext = null;
+let displayedProgress = 0;
+let progressAnimFrame = null;
 
 function startProgressContext(label) {
   progressContext = { label, value: 0 };
@@ -420,8 +422,44 @@ function startProgressContext(label) {
   const status = document.getElementById("statusText");
 
   container.style.display = "block";
+  displayedProgress = 0;
   bar.style.width = "0%";
   status.textContent = label;
+}
+
+function animateProgressTo(targetPercent, duration = 280) {
+  const bar = document.getElementById("progressBar");
+
+  if (progressAnimFrame) {
+    cancelAnimationFrame(progressAnimFrame);
+    progressAnimFrame = null;
+  }
+
+  const start = performance.now();
+  const startPercent = displayedProgress;
+  const delta = targetPercent - startPercent;
+
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease-out curve (feels natural)
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = startPercent + delta * eased;
+
+    displayedProgress = current;
+    bar.style.width = current.toFixed(2) + "%";
+
+    if (progress < 1) {
+      progressAnimFrame = requestAnimationFrame(step);
+    } else {
+      displayedProgress = targetPercent;
+      bar.style.width = targetPercent + "%";
+      progressAnimFrame = null;
+    }
+  }
+
+  progressAnimFrame = requestAnimationFrame(step);
 }
 
 function updateProgressContext(current, total, text) {
@@ -432,15 +470,18 @@ function updateProgressContext(current, total, text) {
     Math.round((current / total) * 100)
   );
 
-  document.getElementById("progressBar").style.width = percent + "%";
-  if (text) document.getElementById("statusText").textContent = text;
+  animateProgressTo(percent);
+
+  if (text) {
+    document.getElementById("statusText").textContent = text;
+  }
 }
 
 function endProgressContext(text = "Completed") {
   const bar = document.getElementById("progressBar");
   const status = document.getElementById("statusText");
 
-  bar.style.width = "100%";
+  animateProgressTo(100, 180);
   status.textContent = text;
 
   setTimeout(() => {
@@ -1783,6 +1824,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

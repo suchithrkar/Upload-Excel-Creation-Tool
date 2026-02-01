@@ -440,8 +440,10 @@ table.dataTable th.fixed-notes-col {
   overflow-x: auto;
 }
 
+/* Let table fit container naturally unless it truly overflows */
 .dt-middle table {
-  min-width: max-content;
+  width: 100%;
+  table-layout: auto;
 }
 
 /* Hide horizontal scrollbar but keep scroll */
@@ -460,4 +462,5 @@ table.dataTable th.fixed-notes-col {
   justify-content: space-between;
   margin: 6px 0;
 }
+
 

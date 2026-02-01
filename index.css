@@ -398,6 +398,7 @@ table.dataTable tbody td {
 
 .mapping-row input {
   flex: 1;
+  max-width: 250px;     /* ✅ limit input width */
 }
 
 .mapping-row button {
@@ -697,6 +698,36 @@ table.dataTable th {
 /* Remove top border for first body row to visually join header */
 .sbd-tbody-scroll tbody tr:first-child td {
   border-top: none;
+}
+
+/* ===== TL & MARKET GRID LAYOUT ===== */
+
+/* Arrange mapping blocks in rows of 3 */
+#tlContainer,
+#marketContainer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Prevent cards from stretching awkwardly */
+#tlContainer .mapping-block,
+#marketContainer .mapping-block {
+  margin-bottom: 0; /* grid handles spacing */
+}
+
+@media (max-width: 900px) {
+  #tlContainer,
+  #marketContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  #tlContainer,
+  #marketContainer {
+    grid-template-columns: 1fr;
+  }
 }
 
 

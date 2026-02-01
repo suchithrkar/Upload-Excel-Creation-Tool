@@ -170,16 +170,14 @@ table.dataTable thead th {
   border-bottom: 1px solid #cfcfcf;
   padding: 6px 8px;
   white-space: nowrap;
-
-  position: sticky;
-  top: calc(50px + 48px);   /* dt-top + sheet-tabs */
-  z-index: 40;
 }
 
-table.dataTable thead {
+/* ===== STICKY TABLE HEADER (CORRECT IMPLEMENTATION) ===== */
+.dt-middle table.dataTable thead th {
   position: sticky;
-  top: calc(50px + 48px);
+  top: 98px;               /* sheet-tabs (48px) + dt-top (50px) */
   z-index: 30;
+  background: #f0f1f3;     /* MUST be set or rows bleed through */
 }
 
 /* TABLE BODY */
@@ -515,6 +513,7 @@ table.dataTable th.fixed-notes-col {
 table.dataTable th {
   box-sizing: border-box;
 }
+
 
 
 

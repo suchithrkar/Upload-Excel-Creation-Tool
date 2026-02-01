@@ -47,7 +47,7 @@ header {
   background: var(--bg-main);
   color: var(--text-main);
   padding: 0; /* IMPORTANT */
-  min-height: calc(100vh - 64px);
+  /* min-height: calc(100vh - 64px); */
 }
 
 /* ===== UPLOAD BAR ===== */
@@ -467,6 +467,7 @@ table.dataTable th.fixed-notes-col {
 table.dataTable th {
   box-sizing: border-box;
 }
+
 
 
 

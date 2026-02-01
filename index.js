@@ -1533,7 +1533,7 @@ async function buildRepairCases() {
     const dnap =
       resolution === "offsite solution" &&
       normalizeText(cso.find(c => c[0] === caseId)?.[4])
-        .includes("product returned unrepaired")
+        .includes("product returned unrepaired to customer")
         ? "True"
         : "";
 
@@ -1698,6 +1698,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

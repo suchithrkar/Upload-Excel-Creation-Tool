@@ -570,24 +570,35 @@ function buildSheetTables(workbook) {
       const headers = TABLE_SCHEMAS[sheetName];
       if (!headers) continue;
 
-      const rows = json.slice(1).map(row => {
-        const cleanedRow = [];
-        const excelRow = row.slice(3);
-
-        for (let i = 0; i < headers.length; i++) {
-          let cell = excelRow[i];
-          if (typeof cell === 'number' && cell > 40000 && cell < 60000) {
-            try {
-              cleanedRow.push(formatDate(excelDateToJSDate(cell)));
-            } catch {
+      const rows = json
+        .slice(1)
+        .map(row => {
+          const excelRow = row;
+      
+          // ✅ Skip empty Excel rows (fixes ghost rows)
+          if (!excelRow.some(cell => String(cell || "").trim() !== "")) {
+            return null;
+          }
+      
+          const cleanedRow = [];
+      
+          for (let i = 0; i < headers.length; i++) {
+            let cell = excelRow[i];
+      
+            if (typeof cell === "number" && cell > 40000 && cell < 60000) {
+              try {
+                cleanedRow.push(formatDate(excelDateToJSDate(cell)));
+              } catch {
+                cleanedRow.push(cleanCell(cell));
+              }
+            } else {
               cleanedRow.push(cleanCell(cell));
             }
-          } else {
-            cleanedRow.push(cleanCell(cell));
           }
-        }
-        return cleanedRow;
-      });
+      
+          return cleanedRow;
+        })
+        .filter(Boolean); // 🔥 removes null rows
 
       const dataTable = dataTablesMap[sheetName];
       dataTable.clear();
@@ -617,6 +628,11 @@ function buildSheetTables(workbook) {
 
 function processExcelFile(file, allowedSheets) {
   return new Promise(resolve => {
+    const store = getStore("readwrite");
+    allowedSheets.forEach(sheet => {
+      dataTablesMap[sheet]?.clear().draw(false);
+      store.put({ sheetName: sheet, rows: [], lastUpdated: new Date().toISOString() });
+    });
     const reader = new FileReader();
 
     reader.onload = async function (evt) {
@@ -1881,6 +1897,7 @@ themeToggle.addEventListener('click', () => {
 // Init theme on load
 const savedTheme = localStorage.getItem('kci-theme') || 'dark';
 setTheme(savedTheme);
+
 
 
 

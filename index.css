@@ -488,6 +488,8 @@ table.dataTable th.fixed-notes-col {
 
 .dt-middle {
   overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 57,6px; /* ✅ reserve space for fixed dt-bottom */
 }
 
 /* Let table fit container naturally unless it truly overflows */
@@ -500,10 +502,6 @@ table.dataTable th.fixed-notes-col {
 .dt-middle::-webkit-scrollbar {
   height: 0;
   background: transparent;
-}
-
-.dt-middle {
-  scrollbar-width: none;
 }
 
 /* Prevent any accidental inline width causing overflow */
@@ -737,6 +735,7 @@ table.dataTable th {
   width: fit-content;              /* 🔥 content-driven width */
   max-width: calc(100vw - 80px);   /* viewport safety */
 }
+
 
 
 

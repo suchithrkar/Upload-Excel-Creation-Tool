@@ -53,7 +53,7 @@ header {
 /* ===== CONTROL CENTER ===== */
 
 .control-center {
-  width: 100%;
+  /* width: 100%; */
   background: linear-gradient(
     to bottom,
     var(--bg-card),
@@ -761,6 +761,7 @@ table.dataTable th {
   width: fit-content;              /* 🔥 content-driven width */
   max-width: calc(100vw - 80px);   /* viewport safety */
 }
+
 
 
 

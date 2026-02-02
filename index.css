@@ -762,22 +762,68 @@ table.dataTable th {
   max-width: calc(100vw - 80px);   /* viewport safety */
 }
 
+/* ===== GLOBAL PROGRESS OVERLAY ===== */
 
+.progress-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 10000;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.progress-card {
+  background: var(--bg-card);
+  padding: 24px 28px;
+  border-radius: 10px;
+  width: 420px;
+  max-width: 90%;
+  text-align: center;
 
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+}
 
+.overlay-status {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
 
+/* Progress bar container */
+.overlay-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #d0d0d0;
+  border-radius: 6px;
+  overflow: hidden;
+}
 
+#overlayProgressBar {
+  height: 100%;
+  width: 0%;
+  background: #151923;
+  transition: width 0.2s ease-out;
+}
 
+/* Final confirmation button */
+.overlay-confirm {
+  margin-top: 18px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
 
+  background: #151923;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-
-
-
-
-
-
-
-
-
+/* Emphasize final status */
+.progress-complete .overlay-status {
+  font-size: 15px;
+  font-weight: 700;
+}

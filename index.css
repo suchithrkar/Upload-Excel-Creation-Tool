@@ -1,4 +1,4 @@
-/* ===== THEME VARIABLES ===== */
+/* ===== THEME VARIABLES ====== */
 body[data-theme="dark"] {
   --bg-app: #0f1117;
   --bg-main: #0f1117;
@@ -735,6 +735,7 @@ table.dataTable th {
   width: fit-content;              /* 🔥 content-driven width */
   max-width: calc(100vw - 80px);   /* viewport safety */
 }
+
 
 
 

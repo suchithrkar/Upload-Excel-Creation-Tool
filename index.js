@@ -1487,7 +1487,12 @@ function renderTLModal(data = []) {
   const container = document.getElementById("tlContainer");
   container.innerHTML = "";
 
-  data.forEach(tl => addTLBlock(tl.name, tl.agents));
+  if (!data.length) {
+    addTLBlock();                       // real empty block
+    container.firstChild.classList.add("placeholder");
+  } else {
+    data.forEach(tl => addTLBlock(tl.name, tl.agents));
+  }
 }
 
 function addTLBlock(name = "", agents = []) {
@@ -1528,7 +1533,12 @@ function renderMarketModal(data = []) {
   const container = document.getElementById("marketContainer");
   container.innerHTML = "";
 
-  data.forEach(m => addMarketBlock(m.name, m.countries));
+  if (!data.length) {
+    addMarketBlock();                   // real empty block
+    container.firstChild.classList.add("placeholder");
+  } else {
+    data.forEach(m => addMarketBlock(m.name, m.countries));
+  }
 }
 
 function addMarketBlock(name = "", countries = []) {
@@ -1619,8 +1629,17 @@ document.getElementById("marketBtn").onclick = async () => {
   };
 };
 
-document.getElementById("addTlBtn").onclick = () => addTLBlock();
-document.getElementById("addMarketBtn").onclick = () => addMarketBlock();
+document.getElementById("addTlBtn").onclick = () => {
+  const container = document.getElementById("tlContainer");
+  container.querySelector(".placeholder")?.remove();
+  addTLBlock();
+};
+
+document.getElementById("addMarketBtn").onclick = () => {
+  const container = document.getElementById("marketContainer");
+  container.querySelector(".placeholder")?.remove();
+  addMarketBlock();
+};
 
 document.getElementById("copySoBtn").addEventListener("click", async () => {
   const output = await buildCopySOOrders();
@@ -1940,4 +1959,5 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 

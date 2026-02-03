@@ -747,8 +747,7 @@ table.dataTable th {
 #tlContainer,
 #marketContainer {
   display: grid;
-  grid-auto-flow: row;           /* 🔥 explicit */
-  grid-template-columns: repeat(3, 320px);
+  grid-template-columns: repeat(auto-fit, minmax(320px, max-content));
   gap: 12px;
   width: fit-content;
 }
@@ -896,6 +895,7 @@ table.dataTable th {
 #soOutput {
   scrollbar-width: none;
 }
+
 
 
 

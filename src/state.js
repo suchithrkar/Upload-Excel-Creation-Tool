@@ -1,6 +1,10 @@
 window.appState = {
-  kciExcelFile: null,
-  kciExcelData: {},
+  // inputs
+  kciExcel: {
+    file: null,
+    raw: {},
+    normalized: {},
+  },
   csoCsv: {
     file: null,
     data: [],
@@ -9,6 +13,10 @@ window.appState = {
     file: null,
     data: [],
   },
+
+  // outputs
   repairCases: [],
   closedCases: [],
+  copySoOrders: [],
+  copyTrackingUrls: [],
 };

@@ -14,7 +14,7 @@ window.appState = {
     data: [],
   },
 
-  // outputs (next steps)
+  // outputs
   repairCases: [],
   closedCases: [],
   copySoOrders: [],

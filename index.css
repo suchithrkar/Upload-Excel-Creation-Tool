@@ -755,6 +755,7 @@ table.dataTable th {
 #tlContainer,
 #marketContainer {
   display: flex;
+  flex-direction: row;   /* 🔥 CRITICAL FIX */
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -881,6 +882,7 @@ table.dataTable th {
 #soOutput {
   scrollbar-width: none;
 }
+
 
 
 

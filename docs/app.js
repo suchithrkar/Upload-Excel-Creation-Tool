@@ -48,6 +48,14 @@ const handleExcelLoad = async (file) => {
   state.kciExcelFile = file || null;
   const rawData = await loadExcelFile(file);
   state.kciExcelData = mapWorkbookData(rawData);
+  const sheetCounts = Object.values(state.kciExcelData).map(
+    (rows) => rows.length
+  );
+  const totalRows = sheetCounts.reduce((sum, count) => sum + count, 0);
+  console.log("KCI Excel loaded.", {
+    sheets: Object.keys(state.kciExcelData).length,
+    totalRows,
+  });
   setOutput("KCI Excel loaded.");
 };
 
@@ -55,6 +63,7 @@ const handleCsvLoad = async (file, targetKey, label, mapper) => {
   state[targetKey].file = file || null;
   const rawData = await loadCsvFile(file);
   state[targetKey].data = mapper ? rawData.map(mapper) : rawData;
+  console.log(`${label} loaded.`, { rows: state[targetKey].data.length });
   setOutput(`${label} loaded.`);
 };
 

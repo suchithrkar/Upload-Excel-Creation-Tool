@@ -18,9 +18,9 @@ const normalizeRow = (row) => {
   return normalized;
 };
 
-export const loadCsvFile = (file) => {
+export const loadCsvFile = async (file) => {
   if (!file) {
-    return Promise.resolve([]);
+    return [];
   }
 
   return new Promise((resolve, reject) => {

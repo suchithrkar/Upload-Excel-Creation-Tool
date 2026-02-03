@@ -18,12 +18,21 @@ const normalizeRow = (row) => {
   return normalized;
 };
 
+const readFileAsArrayBuffer = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () =>
+      reject(reader.error || new Error("Failed to read file."));
+    reader.readAsArrayBuffer(file);
+  });
+
 export const loadExcelFile = async (file) => {
   if (!file) {
     return {};
   }
 
-  const buffer = await file.arrayBuffer();
+  const buffer = await readFileAsArrayBuffer(file);
   const workbook = XLSX.read(buffer, { type: "array" });
 
   return workbook.SheetNames.reduce((acc, sheetName) => {

@@ -560,7 +560,14 @@ table.dataTable th {
 /* Modal size helpers */
 .modal-medium {
   /* width: 640px; */
-  max-width: 95%;
+  max-width: none;
+}
+
+#tlModal .modal,
+#marketModal .modal {
+  width: fit-content;
+  min-width: 320px;              /* one mapping block */
+  max-width: calc(100vw - 80px); /* viewport safety */
 }
 
 .modal-large {
@@ -740,9 +747,10 @@ table.dataTable th {
 #tlContainer,
 #marketContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 320px);
+  grid-auto-flow: row;           /* 🔥 explicit */
+  grid-template-columns: repeat(3, 320px);
   gap: 12px;
-  justify-content: start;
+  width: fit-content;
 }
 
 /* Prevent cards from stretching awkwardly */
@@ -763,6 +771,13 @@ table.dataTable th {
 #tlContainer,
 #marketContainer {
   width: fit-content;     /* 🔥 allow multi-column expansion */
+}
+
+/* Fix Add TL / Market button width */
+#addTlBtn,
+#addMarketBtn {
+  width: fit-content;
+  align-self: flex-start;
 }
 
 /* ===== GLOBAL PROGRESS OVERLAY ===== */
@@ -881,5 +896,6 @@ table.dataTable th {
 #soOutput {
   scrollbar-width: none;
 }
+
 
 

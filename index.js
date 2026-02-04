@@ -1246,128 +1246,82 @@ function parseTrackingResultsCSV(text) {
 }
 
 async function processTrackingResultsFile(file) {
+  // 1️⃣ Load existing data
   const store = getStore("readonly");
   const allData = await new Promise(res => {
     const req = store.getAll();
     req.onsuccess = () => res(req.result);
   });
 
-  const dump = allData.find(r => r.sheetName === "Dump")?.rows || [];
-  const mo = allData.find(r => r.sheetName === "MO")?.rows || [];
-  const moItems = allData.find(r => r.sheetName === "MO Items")?.rows || [];
-  const cso = allData.find(r => r.sheetName === "CSO Status")?.rows || [];
-  const oldDelivery = allData.find(r => r.sheetName === "Delivery Details")?.rows || [];
+  const dump =
+    allData.find(r => r.sheetName === "Dump")?.rows || [];
 
-  const dumpCaseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
-  const dumpResIdx = TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
+  const oldDelivery =
+    allData.find(r => r.sheetName === "Delivery Details")?.rows || [];
 
-  const moCaseIdx = TABLE_SCHEMAS["MO"].indexOf("Case ID");
-  const moOrderIdx = TABLE_SCHEMAS["MO"].indexOf("Order Number");
-  const moCreatedIdx = TABLE_SCHEMAS["MO"].indexOf("Created On");
-  const moStatusIdx = TABLE_SCHEMAS["MO"].indexOf("Order Status");
+  const dumpCaseIdx =
+    TABLE_SCHEMAS["Dump"].indexOf("Case ID");
 
-  const moItemOrderIdx = TABLE_SCHEMAS["MO Items"].indexOf("Material Order");
-  const moItemNameIdx = TABLE_SCHEMAS["MO Items"].indexOf("MO Line Items Name");
-  const moItemUrlIdx = TABLE_SCHEMAS["MO Items"].indexOf("Tracking Url");
+  const delCaseIdx =
+    TABLE_SCHEMAS["Delivery Details"].indexOf("CaseID");
 
-  const csoCaseIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Case ID");
-  const csoStatusIdx = TABLE_SCHEMAS["CSO Status"].indexOf("Status");
+  const delStatusIdx =
+    TABLE_SCHEMAS["Delivery Details"].indexOf("CurrentStatus");
 
-  const oldDelCaseIdx = TABLE_SCHEMAS["Delivery Details"].indexOf("CaseID");
-  const oldDelStatusIdx = TABLE_SCHEMAS["Delivery Details"].indexOf("CurrentStatus");
-
-  // --- Parse Tracking Results CSV ---
+  // 2️⃣ Parse Tracking Results CSV
   const csvText = await file.text();
   const trackingCSVMap = parseTrackingResultsCSV(csvText);
+  // Map<CaseID, CurrentStatus>
 
-  // --- STEP 1A: Parts Shipped cases (MO Stage-1 logic) ---
-  const partsShippedCases = [
-    ...new Set(
-      dump
-        .filter(r => normalizeText(r[dumpResIdx]) === "parts shipped")
-        .map(r => r[dumpCaseIdx])
-    )
-  ];
+  // 3️⃣ Build a map from existing Delivery Details
+  const deliveryMap = new Map();
 
-  const finalCaseSet = new Set();
-
-  partsShippedCases.forEach(caseId => {
-    const caseMOs = mo.filter(r => r[moCaseIdx] === caseId);
-    if (!caseMOs.length) return;
-
-    caseMOs.sort((a, b) => new Date(b[moCreatedIdx]) - new Date(a[moCreatedIdx]));
-    const latestTime = new Date(caseMOs[0][moCreatedIdx]);
-
-    const windowMOs = caseMOs.filter(r =>
-      Math.abs(new Date(r[moCreatedIdx]) - latestTime) <= 5 * 60 * 1000
-    );
-
-    windowMOs.sort(
-      (a, b) => getMOStatusPriority(a[moStatusIdx]) - getMOStatusPriority(b[moStatusIdx])
-    );
-
-    const selected = windowMOs[0];
-    const status = normalizeText(selected[moStatusIdx]);
-
-    if (status !== "closed" && status !== "pod") return;
-
-    // Ensure MO has tracking URL (-1 only)
-    const moNumber = selected[moOrderIdx];
-    const item = moItems.find(r =>
-      r[moItemOrderIdx] === moNumber &&
-      normalizeText(r[moItemNameIdx]).endsWith("- 1") &&
-      r[moItemUrlIdx]
-    );
-
-    if (!item) return;
-
-    finalCaseSet.add(caseId);
+  oldDelivery.forEach(r => {
+    const caseId = r[delCaseIdx];
+    const status = r[delStatusIdx];
+    if (!caseId) return;
+    deliveryMap.set(caseId, status);
   });
 
-  // --- STEP 1B: CSO Delivered cases ---
-  cso.forEach(r => {
-    if (normalizeText(r[csoStatusIdx]) === "delivered") {
-      finalCaseSet.add(r[csoCaseIdx]);
-    }
-  });
-
-  // --- STEP 2: Build Delivery Details rows ---
-  const finalRows = [];
-
+  // 4️⃣ Merge / update using Tracking Results CSV
   let processed = 0;
-  const total = finalCaseSet.size;
-  
-  finalCaseSet.forEach(caseId => {
+  const total = trackingCSVMap.size;
+
+  trackingCSVMap.forEach((status, caseId) => {
     processed++;
     updateProgressContext(
       processed,
       total,
-      `Updating tracking (${processed}/${total})`
+      `Updating Delivery Details (${processed}/${total})`
     );
-    // Priority 1: existing Delivery Details
-    const oldRow = oldDelivery.find(r => r[oldDelCaseIdx] === caseId);
-    if (oldRow && oldRow[oldDelStatusIdx]) {
-      finalRows.push([caseId, oldRow[oldDelStatusIdx]]);
-      return;
-    }
 
-    // Priority 2: Tracking Results CSV
-    if (trackingCSVMap.has(caseId)) {
-      finalRows.push([caseId, trackingCSVMap.get(caseId)]);
-      return;
-    }
-
-    // Fallback
-    finalRows.push([caseId, "No Status Found"]);
+    // Update existing or add new
+    deliveryMap.set(caseId, status);
   });
 
-  // --- Update UI ---
+  // 5️⃣ Cleanup: remove cases NOT present in Dump
+  const validDumpCases = new Set(
+    dump.map(r => r[dumpCaseIdx])
+  );
+
+  [...deliveryMap.keys()].forEach(caseId => {
+    if (!validDumpCases.has(caseId)) {
+      deliveryMap.delete(caseId);
+    }
+  });
+
+  // 6️⃣ Build final Delivery Details rows
+  const finalRows = [...deliveryMap.entries()].map(
+    ([caseId, status]) => [caseId, status]
+  );
+
+  // 7️⃣ Update UI table
   const dt = dataTablesMap["Delivery Details"];
   dt.clear();
   finalRows.forEach(r => dt.row.add(["", ...r]));
   dt.draw(false);
 
-  // --- Save to IndexedDB ---
+  // 8️⃣ Save to IndexedDB
   const writeStore = getStore("readwrite");
   writeStore.put({
     sheetName: "Delivery Details",
@@ -1992,6 +1946,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

@@ -373,6 +373,36 @@ function formatDate(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function normalizeTrackingStatus(value) {
+  if (value === null || value === undefined) return "";
+
+  let str = String(value).trim();
+
+  // 1️⃣ Remove exact trailing ", Last Update:"
+  if (str.endsWith(", Last Update:")) {
+    str = str.replace(/, Last Update:$/, "");
+  }
+
+  // 2️⃣ Excel date serial → formatted date
+  if (/^\d{5}\.\d+$/.test(str)) {
+    const serial = Number(str);
+    if (!isNaN(serial)) {
+      try {
+        const d = excelDateToJSDate(serial);
+
+        const pad = n => String(n).padStart(2, "0");
+        str =
+          `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()} ` +
+          `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      } catch {
+        // fallback: keep original string
+      }
+    }
+  }
+
+  return str;
+}
+
 function normalizeRowToSchema(row, sheetName) {
   const headers = TABLE_SCHEMAS[sheetName];
   const normalized = new Array(headers.length).fill("");
@@ -1296,7 +1326,7 @@ async function processTrackingResultsFile(file) {
     );
 
     // Update existing or add new
-    deliveryMap.set(caseId, status);
+    deliveryMap.set(caseId, normalizeTrackingStatus(status));
   });
 
   // 5️⃣ Cleanup: remove cases NOT present in Dump
@@ -1946,6 +1976,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

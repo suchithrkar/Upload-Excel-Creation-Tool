@@ -60,15 +60,15 @@ header {
     var(--bg-main)
   );
   border-bottom: 1px solid #d6d6d6;
-  padding: 16px 16px 14px;
+  /* padding: 16px 16px 14px; */
 }
 
 /* ===== UPLOAD BAR ===== */
 .upload-box {
   background: transparent;
   border: none;
-  padding: 0;
-  margin-bottom: 12px;
+  padding: 16px;
+  /* margin-bottom: 12px; */
 
   display: flex;
   flex-wrap: wrap;
@@ -246,7 +246,7 @@ table.dataTable tbody td {
 
   background: transparent;
   border: none;
-  padding: 10px 0 0;
+  padding: 16px;
 
   border-top: 1px solid #d6d6d6;
 }
@@ -881,6 +881,7 @@ table.dataTable th {
 #soOutput {
   scrollbar-width: none;
 }
+
 
 
 

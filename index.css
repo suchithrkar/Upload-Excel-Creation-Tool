@@ -1055,3 +1055,39 @@ table.dataTable th {
   color: #555;
 }
 
+.cc-agent-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.cc-agent-box::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+.cc-agent-box {
+  scrollbar-width: none; /* Firefox */
+}
+
+.closed-report-table::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+.closed-report-table {
+  scrollbar-width: none;
+}
+
+.cc-agent-box label {
+  cursor: pointer;
+}
+
+#ccSummaryTable th,
+#ccSummaryTable td,
+#ccDrillTable th,
+#ccDrillTable td {
+  text-align: center;
+}
+
+

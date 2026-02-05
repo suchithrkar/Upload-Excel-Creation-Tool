@@ -995,31 +995,54 @@ function buildClosedCasesMonthFilter(rows) {
 }
 
 function buildClosedCasesAgentFilter(rows) {
-  const select = document.getElementById("ccAgentSelect");
-  select.innerHTML = "";
+  const box = document.getElementById("ccAgentBox");
+  const selectedDiv = document.getElementById("ccAgentSelected");
+
+  box.innerHTML = "";
+  selectedDiv.innerHTML = "";
 
   const agents = [...new Set(
-    rows
-      .map(r => r[7])   // Closed By
-      .filter(v => v && v !== "CRM Auto Closed")
+    rows.map(r => r[7]).filter(v => v && v !== "CRM Auto Closed")
   )].sort();
 
-  agents.forEach(a => {
-    const opt = document.createElement("option");
-    opt.value = a;
-    opt.textContent = a;
-    opt.selected = true; // default = all selected
-    select.appendChild(opt);
+  agents.forEach(name => {
+    const label = document.createElement("label");
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = name;
+    cb.checked = true;
+
+    cb.onchange = () => {
+      updateSelectedAgents();
+      buildClosedCasesSummary(rows);
+    };
+
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(name));
+    box.appendChild(label);
   });
 
-  select.onchange = () => buildClosedCasesSummary(rows);
+  function updateSelectedAgents() {
+    const selected = [...box.querySelectorAll("input:checked")]
+      .map(i => i.value);
+
+    selectedDiv.textContent =
+      selected.length
+        ? "Selected: " + selected.join(", ")
+        : "No agents selected";
+  }
+
+  updateSelectedAgents();
 }
 
 function buildClosedCasesSummary(rows) {
   const month = document.getElementById("ccMonthSelect").value;
   const agentSelect = document.getElementById("ccAgentSelect");
 
-  const selectedAgents = [...agentSelect.selectedOptions].map(o => o.value);
+  const selectedAgents =
+    [...document.querySelectorAll("#ccAgentBox input:checked")]
+      .map(cb => cb.value);
 
   const filtered = rows.filter(r =>
     toYYYYMM(r[6]) === month
@@ -1082,7 +1105,9 @@ function attachDrilldownClicks(rows) {
 
 function buildDrilldown(rows, date) {
   const agentSelect = document.getElementById("ccAgentSelect");
-  const selectedAgents = [...agentSelect.selectedOptions].map(o => o.value);
+  const selectedAgents =
+    [...document.querySelectorAll("#ccAgentBox input:checked")]
+      .map(cb => cb.value);
 
   const map = {};
 
@@ -2179,6 +2204,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

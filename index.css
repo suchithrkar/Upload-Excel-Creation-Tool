@@ -925,3 +925,28 @@ table.dataTable th {
   flex: 1;
   overflow-y: auto; 
 }
+
+.cc-agent-box {
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  padding: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.cc-agent-box label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.cc-agent-selected {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #555;
+  line-height: 1.4;
+}
+

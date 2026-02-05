@@ -999,7 +999,7 @@ function buildClosedCasesMonthFilter(rows) {
   months.forEach(m => {
     const opt = document.createElement("option");
     opt.value = m;
-    opt.textContent = m;
+    opt.textContent = formatMonthDisplay(m);
     select.appendChild(opt);
   });
 
@@ -1026,7 +1026,6 @@ async function loadSelectedKciAgents() {
 }
 
 async function buildClosedCasesAgentFilter(rows) {
-  const savedAgentsPromise = loadSelectedKciAgents();
   const box = document.getElementById("ccAgentBox");
   const selectedDiv = document.getElementById("ccAgentSelected");
 
@@ -1192,6 +1191,7 @@ function attachDrilldownClicks(rows) {
   document.querySelectorAll(".cc-kci").forEach(el => {
     el.onclick = () => {
       const date = el.dataset.date;
+      if (!date) return;   // 🔥 ignore Total row
       buildDrilldown(rows, date);
     };
   });
@@ -2298,6 +2298,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

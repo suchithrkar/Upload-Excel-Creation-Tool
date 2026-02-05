@@ -774,6 +774,14 @@ table.dataTable th {
   margin-bottom: 0;
 }
 
+/* ===== TOTAL ROW STYLING ===== */
+#ccSummaryTable tbody tr:last-child td,
+#ccDrillTable tbody tr:last-child td {
+  background: #e9ecef;
+  font-weight: 800;
+  border-top: 2px solid #999;
+}
+
 /* ===== GLOBAL PROGRESS OVERLAY ===== */
 
 .progress-overlay {
@@ -1107,11 +1115,20 @@ table.dataTable th {
 
 .cc-kci {
   cursor: pointer;
+  padding: 4px 0;
 }
 
-.cc-kci:hover {
-  background: rgba(0, 0, 0, 0.08);
+#ccSummaryTable td .cc-kci:hover {
+  background: rgba(0, 0, 0, 0.12);
 }
 
+/* Weekend highlight */
+#ccSummaryTable tbody tr.cc-weekend td {
+  background: #f5f7fa;
+}
+
+#ccDrillTable tbody tr:last-child td {
+  border-bottom: none;
+}
 
 

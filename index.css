@@ -779,7 +779,7 @@ table.dataTable th {
 #ccDrillTable tbody tr:last-child td {
   background: #e9ecef;
   font-weight: 800;
-  border-top: 2px solid #999;
+  border-top: 1px solid #999;
 }
 
 /* ===== GLOBAL PROGRESS OVERLAY ===== */
@@ -1127,8 +1127,9 @@ table.dataTable th {
   background: #f5f7fa;
 }
 
-#ccDrillTable tbody tr:last-child td {
+/* #ccDrillTable tbody tr:last-child td {
   border-bottom: none;
-}
+} */
+
 
 

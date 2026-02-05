@@ -1141,16 +1141,21 @@ function buildClosedCasesSummary(rows) {
   Object.keys(byDate).sort().forEach(date => {
     const d = byDate[date];
     const agentRC = d.total - d.kci - d.crm;
-
-    table.row.add([
+  
+    const day = new Date(date).getDay(); // 0 = Sun, 6 = Sat
+    const isWeekend = day === 0 || day === 6;
+  
+    const rowNode = table.row.add([
       formatDayDisplay(date),
       d.total,
-      d.kci > 0
-      ? `<span class="cc-kci" data-date="${date}">${d.kci}</span>`
-        : "0",
+      `<div class="cc-kci" data-date="${date}">${d.kci}</div>`,
       d.crm,
       agentRC
-    ]);
+    ]).node();
+  
+    if (isWeekend) {
+      rowNode.classList.add("cc-weekend");
+    }
   });
 
   let totalAll = 0;
@@ -1223,7 +1228,8 @@ const selectedMonth =
 
   let total = 0;
   
-  Object.entries(map).forEach(([agent, count]) => {
+  selectedAgents.forEach(agent => {
+    const count = map[agent] || 0;
     total += count;
     table.row.add([agent, count]);
   });
@@ -2298,6 +2304,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

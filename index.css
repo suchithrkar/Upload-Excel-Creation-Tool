@@ -206,12 +206,6 @@ table.dataTable tbody td {
   white-space: nowrap;               /* Matches KCI */
 }
 
-/* ===== REMOVE DATATABLES ODD / EVEN STRIPING FOR ccSummaryTable ===== */
-#ccSummaryTable tbody tr.odd td,
-#ccSummaryTable tbody tr.even td {
-  background: #ffffff !important;
-}
-
 /* DATATABLES CONTROLS */
 .dataTables_wrapper {
   font-size: 12px;
@@ -1151,4 +1145,5 @@ table.dataTable th {
 #ccSummaryTable tbody tr.cc-weekend td {
   background: #eef0f4;          /* distinct from white */
 }
+
 

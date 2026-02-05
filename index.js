@@ -994,12 +994,30 @@ function buildClosedCasesMonthFilter(rows) {
   select.onchange = () => buildClosedCasesSummary(rows);
 }
 
-function buildClosedCasesAgentFilter(rows) {
+async function saveSelectedKciAgents(agents) {
+  getStore("readwrite").put({
+    sheetName: "KCI_AGENT_PREFS",
+    agents
+  });
+}
+
+async function loadSelectedKciAgents() {
+  const req = getStore("readonly").get("KCI_AGENT_PREFS");
+  return new Promise(res => {
+    req.onsuccess = () => res(req.result?.agents || []);
+  });
+}
+
+async function buildClosedCasesAgentFilter(rows) {
+  const savedAgentsPromise = loadSelectedKciAgents();
   const box = document.getElementById("ccAgentBox");
   const selectedDiv = document.getElementById("ccAgentSelected");
 
   box.innerHTML = "";
   selectedDiv.innerHTML = "";
+
+  // 🔥 Load previously saved KCI agents (if any)
+  const savedAgents = await loadSelectedKciAgents();
 
   const agents = [...new Set(
     rows.map(r => r[7]).filter(v => v && v !== "CRM Auto Closed")
@@ -1011,11 +1029,17 @@ function buildClosedCasesAgentFilter(rows) {
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.value = name;
-    cb.checked = true;
+    cb.checked = savedAgents.includes(name);
 
-    cb.onchange = () => {
+    cb.onchange = async () => {
       updateSelectedAgents();
       buildClosedCasesSummary(rows);
+    
+      const selected =
+        [...box.querySelectorAll("input:checked")]
+          .map(i => i.value);
+    
+      await saveSelectedKciAgents(selected);
     };
 
     label.appendChild(cb);
@@ -1027,13 +1051,36 @@ function buildClosedCasesAgentFilter(rows) {
     const selected = [...box.querySelectorAll("input:checked")]
       .map(i => i.value);
 
-    selectedDiv.textContent =
-      selected.length
-        ? "Selected: " + selected.join(", ")
-        : "No agents selected";
+    selectedDiv.innerHTML = "";
+    
+    selected.forEach(name => {
+      const div = document.createElement("div");
+      div.textContent = name;
+      selectedDiv.appendChild(div);
+    });
   }
 
   updateSelectedAgents();
+
+  // ---------- DROPDOWN OPEN / CLOSE LOGIC ----------
+  const toggle = document.getElementById("ccAgentToggle");
+  
+  // Toggle dropdown on click
+  toggle.onclick = (e) => {
+    e.stopPropagation(); // prevent document click from firing
+    box.style.display =
+      box.style.display === "block" ? "none" : "block";
+  };
+  
+  // Prevent clicks inside dropdown from closing it
+  box.onclick = (e) => {
+    e.stopPropagation();
+  };
+  
+  // Close dropdown when clicking outside
+  document.addEventListener("click", () => {
+    box.style.display = "none";
+  });
 }
 
 function buildClosedCasesSummary(rows) {
@@ -2204,6 +2251,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

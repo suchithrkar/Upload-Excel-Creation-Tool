@@ -970,6 +970,11 @@ function buildClosedCasesMonthFilter(rows) {
     select.appendChild(opt);
   });
 
+  // Ensure latest month is selected by default
+  if (select.options.length) {
+    select.selectedIndex = 0;
+  }
+
   select.onchange = () => buildClosedCasesSummary(rows);
 }
 
@@ -1037,7 +1042,9 @@ function buildClosedCasesSummary(rows) {
     table.row.add([
       date,
       d.total,
-      `<span class="cc-kci" data-date="${date}">${d.kci}</span>`,
+      d.kci > 0
+      ? `<span class="cc-kci" data-date="${date}">${d.kci}</span>`
+      : "0",
       d.crm,
       agentRC
     ]);
@@ -1045,7 +1052,7 @@ function buildClosedCasesSummary(rows) {
 
   table.draw(false);
 
-  attachDrilldownClicks(rows);
+  attachDrilldownClicks(filtered);
 }
 
 function attachDrilldownClicks(rows) {
@@ -1109,20 +1116,6 @@ function switchSheet(sheetName) {
       dataTable.columns.adjust().draw(false);
     }
   });
-}
-
-function normalizeText(val) {
-  return String(val || "").trim().toLowerCase();
-}
-
-function toYYYYMM(dateStr) {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function toDateKey(dateStr) {
-  const d = new Date(dateStr);
-  return d.toISOString().split("T")[0];
 }
 
 function toDateOnly(d) {
@@ -2157,6 +2150,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

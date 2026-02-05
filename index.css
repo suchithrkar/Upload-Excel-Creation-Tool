@@ -566,6 +566,9 @@ table.dataTable th {
 .modal-large {
   width: 95%;
   max-width: 1200px;
+  max-height: 90vh;          /* 🔥 prevent overflow */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header */
@@ -919,5 +922,6 @@ table.dataTable th {
 
 .closed-report-table {
   margin-top: 16px;
+  flex: 1;
+  overflow-y: auto; 
 }
-

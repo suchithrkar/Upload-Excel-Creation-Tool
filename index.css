@@ -566,7 +566,7 @@ table.dataTable th {
 .modal-large {
   width: 95%;
   max-width: 1200px;
-  max-height: 90vh;          /* 🔥 prevent overflow */
+  max-height: 85vh;          /* 🔥 prevent overflow */
   display: flex;
   flex-direction: column;
 }
@@ -1168,6 +1168,7 @@ table.dataTable th {
 .cc-total-btn:hover {
   opacity: 0.9;
 }
+
 
 
 

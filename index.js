@@ -1851,7 +1851,7 @@ function adjustMappingModalWidth(containerId, modalId) {
   const blockWidth = 320;
   const gap = 12;
 
-  const width = count * blockWidth + (count - 1) * gap;
+  const width = count * blockWidth + (count - 1) * gap + 32;
   modal.style.width = width + "px";
 }
 
@@ -2357,6 +2357,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

@@ -946,7 +946,6 @@ table.dataTable th {
 
 .closed-report-drilldown h4 {
   margin: 0;
-  padding: 10px;
   font-size: 13px;
 }
 
@@ -1169,5 +1168,6 @@ table.dataTable th {
 .cc-total-btn:hover {
   opacity: 0.9;
 }
+
 
 

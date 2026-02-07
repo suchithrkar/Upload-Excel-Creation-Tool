@@ -4,6 +4,23 @@ let trackingFile = null;
 let workbookCache = null;
 let tablesMap = {};
 const dataTablesMap = {};
+const CA_BUCKETS = [
+  "0-3 Days",
+  "3-5 Days",
+  "5-10 Days",
+  "10-14 Days",
+  "15-30 Days",
+  "30-60 Days",
+  "60-90 Days",
+  "> 90 Days"
+];
+
+const RESOLUTION_TYPES = [
+  "Onsite Solution",
+  "Parts Shipped",
+  "Offsite Solution"
+];
+
 const TABLE_SCHEMAS = {
   "Dump": [
     "Case ID",
@@ -352,6 +369,130 @@ function normalizeText(val) {
   return String(val || "")
     .trim()
     .toLowerCase();
+}
+
+function createEmptyMatrix() {
+  const matrix = {};
+
+  RESOLUTION_TYPES.forEach(r => {
+    matrix[r] = {};
+    CA_BUCKETS.forEach(ca => matrix[r][ca] = 0);
+    matrix[r].Total = 0;
+  });
+
+  matrix.Total = {};
+  CA_BUCKETS.forEach(ca => matrix.Total[ca] = 0);
+  matrix.Total.Total = 0;
+
+  return matrix;
+}
+
+function buildOpenRepairCasesList(allData) {
+  const dump =
+    allData.find(x => x.sheetName === "Dump")?.rows || [];
+
+  const caseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
+  const resIdx =
+    TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
+
+  return [
+    ...new Set(
+      dump
+        .filter(r =>
+          ["onsite solution", "parts shipped", "offsite solution"]
+            .includes(normalizeText(r[resIdx]))
+        )
+        .map(r => r[caseIdx])
+    )
+  ];
+}
+
+function buildMatrixFromCases(caseIds, repairRows) {
+  const matrix = createEmptyMatrix();
+
+  const caseIdx = TABLE_SCHEMAS["Repair Cases"].indexOf("Case ID");
+  const resIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Case Resolution Code");
+  const caIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("CA Group");
+
+  caseIds.forEach(id => {
+    const row = repairRows.find(r => r[caseIdx] === id);
+    if (!row) return; // confirmed skip
+
+    const res = row[resIdx];
+    const ca = row[caIdx];
+
+    if (!matrix[res] || !matrix[res][ca]) return;
+
+    matrix[res][ca]++;
+    matrix[res].Total++;
+    matrix.Total[ca]++;
+    matrix.Total.Total++;
+  });
+
+  return matrix;
+}
+
+function buildReadyForClosureList(caseIds, repairRows) {
+  const caseIdx = TABLE_SCHEMAS["Repair Cases"].indexOf("Case ID");
+  const resIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Case Resolution Code");
+
+  const onsiteIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Onsite RFC");
+  const csrIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("CSR RFC");
+  const benchIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Bench RFC");
+
+  return caseIds.filter(id => {
+    const row = repairRows.find(r => r[caseIdx] === id);
+    if (!row) return false;
+
+    const res = row[resIdx];
+    const onsite = normalizeText(row[onsiteIdx]);
+    const csr = normalizeText(row[csrIdx]);
+    const bench = normalizeText(row[benchIdx]);
+
+    if (
+      res === "Onsite Solution" &&
+      ["closed - cancelled", "closed - posted", "open - completed"]
+        .includes(onsite)
+    ) return true;
+
+    if (
+      res === "Parts Shipped" &&
+      ["cancelled", "pod", "closed"].includes(csr)
+    ) return true;
+
+    if (
+      res === "Offsite Solution" &&
+      ["delivered", "order cancelled, not to be reopened"]
+        .includes(bench)
+    ) return true;
+
+    return false;
+  });
+}
+
+function renderOrcTable(containerId, matrix) {
+  let html = `<table class="orc-table"><thead><tr><th></th>`;
+
+  CA_BUCKETS.forEach(ca => html += `<th>${ca}</th>`);
+  html += `<th>Total</th></tr></thead><tbody>`;
+
+  RESOLUTION_TYPES.forEach(r => {
+    html += `<tr><td class="row-header">${r}</td>`;
+    CA_BUCKETS.forEach(ca => html += `<td>${matrix[r][ca]}</td>`);
+    html += `<td>${matrix[r].Total}</td></tr>`;
+  });
+
+  html += `<tr class="total-row"><td class="row-header">Total</td>`;
+  CA_BUCKETS.forEach(ca => html += `<td>${matrix.Total[ca]}</td>`);
+  html += `<td>${matrix.Total.Total}</td></tr></tbody></table>`;
+
+  document.getElementById(containerId).innerHTML = html;
 }
 
 function toYYYYMM(dateStr) {
@@ -996,6 +1137,36 @@ async function openClosedCasesReport() {
   buildDrilldownTotal(closed);
   
   openModal("closedCasesReportModal");
+}
+
+async function openOpenRepairCasesReport() {
+  const store = getStore("readonly");
+  const all = await new Promise(r => {
+    const q = store.getAll();
+    q.onsuccess = () => r(q.result);
+  });
+
+  const repair =
+    all.find(x => x.sheetName === "Repair Cases")?.rows || [];
+
+  if (!repair.length) {
+    alert("Repair Cases data not available.");
+    return;
+  }
+
+  const openCases = buildOpenRepairCasesList(all);
+  const openMatrix =
+    buildMatrixFromCases(openCases, repair);
+
+  const readyCases =
+    buildReadyForClosureList(openCases, repair);
+  const readyMatrix =
+    buildMatrixFromCases(readyCases, repair);
+
+  renderOrcTable("openRepairCasesTable", openMatrix);
+  renderOrcTable("readyForClosureTable", readyMatrix);
+
+  openModal("openRepairCasesReportModal");
 }
 
 function buildClosedCasesMonthFilter(rows) {
@@ -2021,6 +2192,9 @@ document.getElementById("addMarketBtn").onclick = () => {
 document.getElementById("closedCasesReportBtn")
   .addEventListener("click", openClosedCasesReport);
 
+document.getElementById("openRepairCasesReportBtn")
+  .addEventListener("click", openOpenRepairCasesReport);
+
 document.getElementById("copySoBtn").addEventListener("click", async () => {
   const output = await buildCopySOOrders();
 
@@ -2417,6 +2591,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

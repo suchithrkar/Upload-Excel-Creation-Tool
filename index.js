@@ -2354,18 +2354,18 @@ async function buildRepairCases() {
       )?.name || "";
 
     const onsiteRFC =
-      calculatedResolution === "onsite solution"
+      calculatedResolution === "Onsite Solution"
         ? (wo.filter(w => w[0] === caseId)
             .sort((a, b) => new Date(b[6]) - new Date(a[6]))[0]?.[5] || "")
         : "Not Found";
 
     const csrRFC =
-      calculatedResolution === "parts shipped"
+      calculatedResolution === "Parts Shipped"
         ? (getLatestMO(caseId, mo)?.[3] || "")
         : "Not Found";
 
     const benchRFC =
-      calculatedResolution === "offsite solution"
+      calculatedResolution === "Offsite Solution"
         ? (cso.find(c => c[0] === caseId)?.[2] || "")
         : "Not Found";
 
@@ -2379,7 +2379,7 @@ async function buildRepairCases() {
     let partNumber = "";
     let partName = "";
     
-    if (resolution === "parts shipped") {
+    if (calculatedResolution === "Parts Shipped") {
       const latestMO = getLatestMO(caseId, mo);
     
       if (latestMO) {
@@ -2643,6 +2643,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

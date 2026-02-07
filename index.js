@@ -2296,8 +2296,6 @@ async function buildClosedCasesReport() {
     rows: remaining,
     lastUpdated: new Date().toISOString()
   });
-
-  write.put({ sheetName: "Repair Cases", rows: remaining });
 }
 
 document.getElementById("processRepairBtn")
@@ -2395,6 +2393,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

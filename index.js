@@ -2231,17 +2231,14 @@ async function buildClosedCasesReport() {
     closedMap.set(r[0], r);
   });
 
+  const newlyClosedIds = new Set();
+
   const closed = all.find(x => x.sheetName === "Closed Cases")?.rows || [];
   const repair = all.find(x => x.sheetName === "Repair Cases")?.rows || [];
-
-  const now = new Date();
-  const cutoff = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
   const rows = [];
 
   closed.forEach(c => {
-    const closedDate = new Date(c[4]);
-    if (closedDate < cutoff) return;
 
     const repairRow = repair.find(r => r[0] === c[0]);
 
@@ -2260,13 +2257,33 @@ async function buildClosedCasesReport() {
     closedMap.set(c[0], [
       c[0],
       repairRow?.[1] || "",
-      c[1], c[6], c[2], c[3], c[4],
+      c[1],                 // Created On
+      c[6],                 // Created By
+      c[2],                 // Modified By
+      c[3],                 // Modified On
+      c[4],                 // Case Closed Date
       closedBy,
-      c[9], c[5], c[8], c[10],
-      repairRow?.[9] || "",
-      repairRow?.[10] || "",
-      repairRow?.[14] || ""
+      c[9],                 // Country
+      c[5],                 // Resolution Code
+      c[8],                 // Case Owner
+      c[10],                // OTC Code
+      repairRow?.[9] || "", // TL
+      repairRow?.[10] || "",// SBD
+      repairRow?.[14] || "" // Market
     ]);
+    
+    newlyClosedIds.add(c[0]);
+  });
+
+  // ===== Retention cleanup: keep only last 6 months =====
+  const now = new Date();
+  const cutoff = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+  
+  closedMap.forEach((row, caseId) => {
+    const closedDate = new Date(row[6]); // Case Closed Date
+    if (closedDate < cutoff) {
+      closedMap.delete(caseId);
+    }
   });
 
   const finalClosedRows = [...closedMap.values()];
@@ -2285,10 +2302,8 @@ async function buildClosedCasesReport() {
     lastUpdated: new Date().toISOString()
   });
 
-  const closedIds = new Set(finalClosedRows.map(r => r[0]));
-  
   const remaining = repair.filter(
-    r => !closedIds.has(r[0])
+    r => !newlyClosedIds.has(r[0])
   );
   
   write.put({
@@ -2393,6 +2408,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

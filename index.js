@@ -155,6 +155,12 @@ const TABLE_SCHEMAS = {
   ]
 };
 
+function isRepairResolution(resolution) {
+  return RESOLUTION_TYPES
+    .map(r => r.toLowerCase())
+    .includes(normalizeText(resolution));
+}
+
 // Dump sheet header display overrides (UI only) ---
 const DUMP_HEADER_DISPLAY_MAP = {
   "Full Name (Primary Contact) (Contact)": "Customer Name",
@@ -369,6 +375,15 @@ function normalizeText(val) {
   return String(val || "")
     .trim()
     .toLowerCase();
+}
+
+function buildDumpCaseMap(dump, caseIdx) {
+  const map = Object.create(null);
+  dump.forEach(r => {
+    const id = r[caseIdx];
+    if (id) map[id] = r;
+  });
+  return map;
 }
 
 function createEmptyMatrix() {
@@ -990,6 +1005,7 @@ async function processGNProCSOFile(file) {
 
   const dumpCaseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
   const dumpResIdx = TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
+  const dumpByCaseId = buildDumpCaseMap(dump, dumpCaseIdx);
 
   const soCaseIdx = TABLE_SCHEMAS["SO"].indexOf("Case ID");
   const soDateIdx = TABLE_SCHEMAS["SO"].indexOf("Date and Time Submitted");
@@ -1004,17 +1020,14 @@ async function processGNProCSOFile(file) {
   const repairCaseIds = [
     ...new Set(
       dump
-        .filter(r =>
-          ["onsite solution", "parts shipped", "offsite solution"]
-            .includes(normalizeText(r[dumpResIdx]))
-        )
+        .filter(r => isRepairResolution(r[dumpResIdx]))
         .map(r => r[dumpCaseIdx])
     )
   ];
   
   // 2️⃣ Recalculate resolution per case
   const offsiteCases = repairCaseIds.filter(caseId => {
-    const dumpRow = dump.find(r => r[dumpCaseIdx] === caseId);
+    const dumpRow = dumpByCaseId[caseId];
     if (!dumpRow) return false;
   
     const derivedResolution = getCalculatedResolution(
@@ -1674,6 +1687,7 @@ async function buildCopySOOrders() {
 
   const dumpIdx = TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
   const dumpCaseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
+  const dumpByCaseId = buildDumpCaseMap(dump, dumpCaseIdx);
 
   const soCaseIdx = TABLE_SCHEMAS["SO"].indexOf("Case ID");
   const soDateIdx = TABLE_SCHEMAS["SO"].indexOf("Date and Time Submitted");
@@ -1686,17 +1700,14 @@ async function buildCopySOOrders() {
   const repairCaseIds = [
     ...new Set(
       dump
-        .filter(r =>
-          ["onsite solution", "parts shipped", "offsite solution"]
-            .includes(normalizeText(r[dumpIdx]))
-        )
+        .filter(r => isRepairResolution(r[dumpIdx]))
         .map(r => r[dumpCaseIdx])
     )
   ];
   
   // Step 2: Recalculate resolution
   const offsiteCases = repairCaseIds.filter(caseId => {
-    const dumpRow = dump.find(r => r[dumpCaseIdx] === caseId);
+    const dumpRow = dumpByCaseId[caseId];
     if (!dumpRow) return false;
   
     const derivedResolution = getCalculatedResolution(
@@ -1758,6 +1769,7 @@ async function buildCopyTrackingURLs() {
 
   const dumpCaseIdx = TABLE_SCHEMAS["Dump"].indexOf("Case ID");
   const dumpResIdx = TABLE_SCHEMAS["Dump"].indexOf("Case Resolution Code");
+  const dumpByCaseId = buildDumpCaseMap(dump, dumpCaseIdx);
 
   const moOrderIdx = TABLE_SCHEMAS["MO"].indexOf("Order Number");
   const moCaseIdx = TABLE_SCHEMAS["MO"].indexOf("Case ID");
@@ -1779,17 +1791,14 @@ async function buildCopyTrackingURLs() {
   const repairCaseIds = [
     ...new Set(
       dump
-        .filter(r =>
-          ["onsite solution", "parts shipped", "offsite solution"]
-            .includes(normalizeText(r[dumpResIdx]))
-        )
+        .filter(r => isRepairResolution(r[dumpResIdx])))
         .map(r => r[dumpCaseIdx])
     )
   ];
   
   // Stage 2: Recalculate resolution
   const partsShippedCases = repairCaseIds.filter(caseId => {
-    const dumpRow = dump.find(r => r[dumpCaseIdx] === caseId);
+    const dumpRow = dumpByCaseId[caseId];
     if (!dumpRow) return false;
   
     const derivedResolution = getCalculatedResolution(
@@ -2701,6 +2710,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

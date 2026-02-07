@@ -2370,7 +2370,7 @@ async function buildRepairCases() {
         : "Not Found";
 
     const dnap =
-      calculatedResolution === "offsite solution" &&
+      calculatedResolution === "Offsite Solution" &&
       normalizeText(cso.find(c => c[0] === caseId)?.[4])
         .includes("product returned unrepaired to customer")
         ? "True"
@@ -2643,6 +2643,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

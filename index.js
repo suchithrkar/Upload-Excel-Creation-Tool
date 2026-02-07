@@ -484,7 +484,20 @@ function renderOrcTable(containerId, matrix) {
 
   RESOLUTION_TYPES.forEach(r => {
     html += `<tr><td class="row-header">${r}</td>`;
-    CA_BUCKETS.forEach(ca => html += `<td>${matrix[r][ca]}</td>`);
+    CA_BUCKETS.forEach(ca => {
+      const val = matrix[r][ca];
+    
+      if (containerId === "readyForClosureTable" && val > 0) {
+        html +=
+          `<td class="orc-clickable"
+               data-res="${r}"
+               data-ca="${ca}">
+             ${val}
+           </td>`;
+      } else {
+        html += `<td>${val}</td>`;
+      }
+    });
     html += `<td>${matrix[r].Total}</td></tr>`;
   });
 
@@ -493,6 +506,70 @@ function renderOrcTable(containerId, matrix) {
   html += `<td>${matrix.Total.Total}</td></tr></tbody></table>`;
 
   document.getElementById(containerId).innerHTML = html;
+}
+
+async function openReadyForClosureDrill(resolution, caGroup) {
+  const store = getStore("readonly");
+  const all = await new Promise(r => {
+    const q = store.getAll();
+    q.onsuccess = () => r(q.result);
+  });
+
+  const repair =
+    all.find(x => x.sheetName === "Repair Cases")?.rows || [];
+
+  const caseIdx = TABLE_SCHEMAS["Repair Cases"].indexOf("Case ID");
+  const resIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Case Resolution Code");
+  const caIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("CA Group");
+  const onsiteIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Onsite RFC");
+  const csrIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("CSR RFC");
+  const benchIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Bench RFC");
+  const ownerIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Case Owner");
+  const countryIdx =
+    TABLE_SCHEMAS["Repair Cases"].indexOf("Country");
+
+  const rows = repair.filter(r =>
+    r[resIdx] === resolution &&
+    r[caIdx] === caGroup &&
+    buildReadyForClosureList([r[caseIdx]], repair).length === 1
+  );
+
+  const table = $("#orcDrillTable").DataTable({
+    destroy: true,
+    paging: false,
+    searching: false,
+    info: false,
+    ordering: false,
+    dom: "t"
+  });
+
+  table.clear();
+
+  rows.forEach(r => {
+    table.row.add([
+      r[caseIdx],
+      r[resIdx],
+      r[caIdx],
+      r[onsiteIdx],
+      r[csrIdx],
+      r[benchIdx],
+      r[ownerIdx],
+      r[countryIdx]
+    ]);
+  });
+
+  table.draw(false);
+
+  document.getElementById("orcDrillTitle").textContent =
+    `Ready for Closure – ${resolution} | ${caGroup}`;
+
+  openModal("orcDrillModal");
 }
 
 function toYYYYMM(dateStr) {
@@ -1168,6 +1245,16 @@ async function openOpenRepairCasesReport() {
 
   openModal("openRepairCasesReportModal");
 }
+
+document.addEventListener("click", e => {
+  const cell = e.target.closest(".orc-clickable");
+  if (!cell) return;
+
+  const resolution = cell.dataset.res;
+  const caGroup = cell.dataset.ca;
+
+  openReadyForClosureDrill(resolution, caGroup);
+});
 
 function buildClosedCasesMonthFilter(rows) {
   const select = document.getElementById("ccMonthSelect");
@@ -2591,6 +2678,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

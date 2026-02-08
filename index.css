@@ -1263,4 +1263,41 @@ table.dataTable th {
   white-space: nowrap;
 }
 
+/* ===== SBD SUMMARY PILLS ===== */
+
+.orc-sbd-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sbd-label {
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.sbd-pill {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Subtle colors (professional) */
+.sbd-met {
+  background: rgba(0, 200, 83, 0.15);
+  color: #0a7a3a;
+}
+
+.sbd-not-met {
+  background: rgba(255, 82, 82, 0.15);
+  color: #a52727;
+}
+
+.sbd-na {
+  background: rgba(120, 120, 120, 0.15);
+  color: #444;
+}
+
 

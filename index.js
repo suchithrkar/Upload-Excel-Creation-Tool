@@ -254,6 +254,16 @@ async function renderTeamDropdown() {
   dropdown.appendChild(add);
 }
 
+document.getElementById("teamToggle").onclick = (e) => {
+  e.stopPropagation();
+  const dd = document.getElementById("teamDropdown");
+  dd.style.display = dd.style.display === "block" ? "none" : "block";
+};
+
+document.addEventListener("click", () => {
+  document.getElementById("teamDropdown").style.display = "none";
+});
+
 async function addTeamInline() {
   const name = prompt("Enter new team name");
   if (!name) return;
@@ -746,13 +756,6 @@ document.getElementById('processBtn').addEventListener('click', async () => {
     const store = getStore("readwrite");
     ["Dump", "WO", "MO", "MO Items", "SO", "Closed Cases"].forEach(sheet => {
       dataTablesMap[sheet]?.clear().draw(false);
-      store.put({
-        id: getTeamKey(sheetName),
-        team: currentTeam,
-        sheetName,
-        rows,
-        lastUpdated: new Date().toISOString()
-      });
     });
   
     await processExcelFile(kciFile, [
@@ -960,6 +963,8 @@ function buildSheetTables(workbook) {
       dataTable.draw(false);
 
       getStore("readwrite").put({
+        id: getTeamKey(sheetName),
+        team: currentTeam,
         sheetName,
         rows: rows.map(r => normalizeRowToSchema(r, sheetName)),
         lastUpdated: new Date().toISOString()
@@ -1043,10 +1048,10 @@ function processCsvFile(file, targetSheetName) {
       // Save to IndexedDB
       const store = getStore("readwrite");
       store.put({
-        id: getTeamKey(sheetName),
+        id: getTeamKey(targetSheetName),
         team: currentTeam,
-        sheetName,
-        rows,
+        sheetName: targetSheetName,
+        rows: dataRows,
         lastUpdated: new Date().toISOString()
       });
 
@@ -1205,11 +1210,11 @@ async function processGNProCSOFile(file) {
 
   // Save to IndexedDB
   const writeStore = getStore("readwrite");
-  writestore.put({
-    id: getTeamKey(sheetName),
+  writeStore.put({
+    id: getTeamKey("CSO Status"),
     team: currentTeam,
-    sheetName,
-    rows,
+    sheetName: "CSO Status",
+    rows: finalRows,
     lastUpdated: new Date().toISOString()
   });
 }
@@ -1238,7 +1243,7 @@ function loadDataFromDB() {
 
 document.getElementById("ccDrillTotalBtn").onclick = () => {
   const store = getStore("readonly");
-  store.get("Closed Cases Data").onsuccess = e => {
+  store.get(getTeamKey("Closed Cases Data")).onsuccess = e => {
     buildDrilldownTotal(e.target.result.rows || []);
   };
 };
@@ -1353,13 +1358,15 @@ function buildClosedCasesMonthFilter(rows) {
 
 async function saveSelectedKciAgents(agents) {
   getStore("readwrite").put({
+    id: getTeamKey("KCI_AGENT_PREFS"),
+    team: currentTeam,
     sheetName: "KCI_AGENT_PREFS",
     agents
   });
 }
 
 async function loadSelectedKciAgents() {
-  const req = getStore("readonly").get("KCI_AGENT_PREFS");
+  const req = getStore("readonly").get(getTeamKey("KCI_AGENT_PREFS"));
   return new Promise(res => {
     req.onsuccess = () => res(req.result?.agents || []);
   });
@@ -2123,11 +2130,11 @@ async function processTrackingResultsFile(file) {
 
   // 8️⃣ Save to IndexedDB
   const writeStore = getStore("readwrite");
-  writestore.put({
-    id: getTeamKey(sheetName),
+  writeStore.put({
+    id: getTeamKey("Delivery Details"),
     team: currentTeam,
-    sheetName,
-    rows,
+    sheetName: "Delivery Details",
+    rows: finalRows,
     lastUpdated: new Date().toISOString()
   });
 }
@@ -2231,10 +2238,10 @@ async function saveSbdData() {
 
   const store = getStore("readwrite");
   store.put({
-    id: getTeamKey(sheetName),
+    id: getTeamKey("SBD Cut Off Times"),
     team: currentTeam,
-    sheetName,
-    rows,
+    sheetName: "SBD Cut Off Times",
+    periods,
     lastUpdated: new Date().toISOString()
   });
 
@@ -2382,7 +2389,13 @@ document.getElementById("saveTlBtn").onclick = () => {
     data.push({ name, agents });
   });
 
-  getStore("readwrite").put({ sheetName: "TL_MAP", data });
+  getStore("readwrite").put({
+    id: getTeamKey("TL_MAP"),
+    team: currentTeam,
+    sheetName: "TL_MAP",
+    data,
+    lastUpdated: new Date().toISOString()
+  });
   closeModal("tlModal");
 };
 
@@ -2401,7 +2414,13 @@ document.getElementById("saveMarketBtn").onclick = () => {
     data.push({ name, countries });
   });
 
-  getStore("readwrite").put({ sheetName: "MARKET_MAP", data });
+  getStore("readwrite").put({
+    id: getTeamKey("MARKET_MAP"),
+    team: currentTeam,
+    sheetName: "MARKET_MAP",
+    data,
+    lastUpdated: new Date().toISOString()
+  });
   closeModal("marketModal");
 };
 
@@ -2848,6 +2867,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

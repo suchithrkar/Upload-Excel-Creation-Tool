@@ -1,13 +1,13 @@
 /* ===== THEME VARIABLES ===== */
 body {
-  --bg-app: #f2f2f2;
-  --bg-main: #f2f2f2;
-  --bg-card: #ffffff;
+  --bg-app: #0f1117;
+  --bg-main: #0f1117;
+  --bg-card: #151923;
   --bg-table: #ffffff;
   --bg-header: #151923;
-  --bg-tab: #e0e0e0;
+  --bg-tab: #2a2f3a;
 
-  --text-main: #1f1f1f;
+  --text-main: #e6e6e6;
   --text-dark: #1f1f1f;
 }
 
@@ -1294,6 +1294,7 @@ table.dataTable th {
   border: 1px solid rgba(255,255,255,0.35);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
 }
+
 
 
 

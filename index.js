@@ -164,6 +164,14 @@ function isRepairResolution(resolution) {
     .includes(normalizeText(resolution));
 }
 
+function requireTeamSelected() {
+  if (!currentTeam) {
+    alert("Please select a team before continuing.");
+    return false;
+  }
+  return true;
+}
+
 // Dump sheet header display overrides (UI only) --
 const DUMP_HEADER_DISPLAY_MAP = {
   "Full Name (Primary Contact) (Contact)": "Customer Name",
@@ -217,6 +225,9 @@ async function setCurrentTeam(team) {
   localStorage.setItem("kci-last-team", team);
   document.getElementById("teamToggle").textContent = team + " ▾";
   await loadDataFromDB();   // 🔥 reload team-scoped data
+  document.querySelectorAll(
+    ".action-bar button, #processBtn"
+  ).forEach(btn => btn.disabled = false);
 }
 
 async function renderTeamDropdown() {
@@ -748,6 +759,7 @@ document.getElementById('trackingInput').addEventListener('change', e => {
 });
 
 document.getElementById('processBtn').addEventListener('click', async () => {
+  if (!requireTeamSelected()) return;
 
   if (kciFile) {
     startProgressContext("Processing KCI Excel...");
@@ -2249,6 +2261,7 @@ async function saveSbdData() {
 }
 
 document.getElementById("sbdBtn").onclick = async () => {
+  if (!requireTeamSelected()) return;
   const store = getStore("readonly");
   const req = store.get(getTeamKey("SBD Cut Off Times"));
 
@@ -2425,6 +2438,7 @@ document.getElementById("saveMarketBtn").onclick = () => {
 };
 
 document.getElementById("tlBtn").onclick = async () => {
+  if (!requireTeamSelected()) return;
   const req = getStore().get(getTeamKey("TL_MAP"));
   req.onsuccess = () => {
     renderTLModal(req.result?.data || []);
@@ -2433,6 +2447,7 @@ document.getElementById("tlBtn").onclick = async () => {
 };
 
 document.getElementById("marketBtn").onclick = async () => {
+  if (!requireTeamSelected()) return;
   const req = getStore().get(getTeamKey("MARKET_MAP"));
   req.onsuccess = () => {
     renderMarketModal(req.result?.data || []);
@@ -2453,12 +2468,19 @@ document.getElementById("addMarketBtn").onclick = () => {
 };
 
 document.getElementById("closedCasesReportBtn")
-  .addEventListener("click", openClosedCasesReport);
+  .addEventListener("click", () => {
+    if (!requireTeamSelected()) return;
+    openClosedCasesReport();
+  });
 
 document.getElementById("openRepairCasesReportBtn")
-  .addEventListener("click", openOpenRepairCasesReport);
+  .addEventListener("click", () => {
+    if (!requireTeamSelected()) return;
+    openOpenRepairCasesReport();
+  });
 
 document.getElementById("copySoBtn").addEventListener("click", async () => {
+  if (!requireTeamSelected()) return;
   const output = await buildCopySOOrders();
 
   const lines = output
@@ -2478,6 +2500,7 @@ document.getElementById("copySoBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("copyTrackingBtn").addEventListener("click", async () => {
+  if (!requireTeamSelected()) return;
   const output = await buildCopyTrackingURLs();
 
   const lines = output
@@ -2774,6 +2797,8 @@ async function buildClosedCasesReport() {
 document.getElementById("processRepairBtn")
   .addEventListener("click", async () => {
 
+    if (!requireTeamSelected()) return;
+
     startProgressContext("Building Repair Cases...");
 
     const store = getStore("readonly");
@@ -2815,6 +2840,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     setCurrentTeam(lastTeam);
   } else {
     document.getElementById("teamToggle").textContent = "Select Team ▾";
+  }
+  if (!lastTeam) {
+    document.querySelectorAll(
+      ".action-bar button, #processBtn"
+    ).forEach(btn => btn.disabled = true);
   }
   initEmptyTables();
 
@@ -2873,6 +2903,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

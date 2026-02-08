@@ -2250,7 +2250,7 @@ async function saveSbdData() {
 
 document.getElementById("sbdBtn").onclick = async () => {
   const store = getStore("readonly");
-  const req = store.get("SBD Cut Off Times");
+  const req = store.get(getTeamKey("SBD Cut Off Times"));
 
   req.onsuccess = () => {
     const data = req.result || createEmptySbdData();
@@ -2425,7 +2425,7 @@ document.getElementById("saveMarketBtn").onclick = () => {
 };
 
 document.getElementById("tlBtn").onclick = async () => {
-  const req = getStore().get("TL_MAP");
+  const req = getStore().get(getTeamKey("TL_MAP"));
   req.onsuccess = () => {
     renderTLModal(req.result?.data || []);
     openModal("tlModal");
@@ -2433,7 +2433,7 @@ document.getElementById("tlBtn").onclick = async () => {
 };
 
 document.getElementById("marketBtn").onclick = async () => {
-  const req = getStore().get("MARKET_MAP");
+  const req = getStore().get(getTeamKey("MARKET_MAP"));
   req.onsuccess = () => {
     renderMarketModal(req.result?.data || []);
     openModal("marketModal");
@@ -2660,6 +2660,8 @@ async function buildRepairCases() {
   
   // Save to DB
   getStore("readwrite").put({
+    id: getTeamKey("Repair Cases"),
+    team: currentTeam,
     sheetName: "Repair Cases",
     rows: finalRows,
     lastUpdated: new Date().toISOString()
@@ -2749,6 +2751,8 @@ async function buildClosedCasesReport() {
   // Save to DB
   const write = getStore("readwrite");
   write.put({
+    id: getTeamKey("Closed Cases Data"),
+    team: currentTeam,
     sheetName: "Closed Cases Data",
     rows: finalClosedRows,
     lastUpdated: new Date().toISOString()
@@ -2759,6 +2763,8 @@ async function buildClosedCasesReport() {
   );
   
   write.put({
+    id: getTeamKey("Repair Cases"),
+    team: currentTeam,
     sheetName: "Repair Cases",
     rows: remaining,
     lastUpdated: new Date().toISOString()
@@ -2867,6 +2873,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

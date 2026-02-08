@@ -1791,7 +1791,7 @@ async function buildCopyTrackingURLs() {
   const repairCaseIds = [
     ...new Set(
       dump
-        .filter(r => isRepairResolution(r[dumpResIdx])))
+        .filter(r => isRepairResolution(r[dumpResIdx]))
         .map(r => r[dumpCaseIdx])
     )
   ];
@@ -2710,6 +2710,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 

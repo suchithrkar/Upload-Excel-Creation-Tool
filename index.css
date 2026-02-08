@@ -1193,6 +1193,25 @@ table.dataTable th {
   background: #fff;
 }
 
+/* ===== OPEN REPAIR CASES TABLE – FIXED COLUMN WIDTHS ===== */
+
+.orc-table {
+  table-layout: fixed;   /* 🔥 force equal distribution */
+}
+
+/* First column = 1.5x */
+.orc-table th:first-child,
+.orc-table td:first-child {
+  width: 15%;
+  text-align: left;
+}
+
+/* Remaining columns = equal width */
+.orc-table th:not(:first-child),
+.orc-table td:not(:first-child) {
+  width: calc(85% / 9);  /* 9 remaining columns */
+}
+
 .orc-table th,
 .orc-table td {
   border: 1px solid #d6d6d6;
@@ -1217,6 +1236,31 @@ table.dataTable th {
 .orc-table tr.total-row td {
   font-weight: 700;
   background: #f7f8fa;
+}
+
+/* ===== OPEN REPAIR CASES HEADER ===== */
+
+.orc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #d6d6d6;
+  background: var(--bg-header);
+  color: #fff;
+}
+
+.orc-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.orc-sbd-summary {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
 

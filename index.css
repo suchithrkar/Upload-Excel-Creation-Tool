@@ -28,6 +28,10 @@ header {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.2px;
+
+  display: flex;                 /* 🔥 REQUIRED */
+  align-items: center;
+  gap: 16px;
 }
 
 /* ===== CONTENT AREA ===== */
@@ -1379,6 +1383,23 @@ header .team-selector .cc-agent-toggle {
 header .team-selector .cc-agent-box {
   min-width: 200px;
   color: #1f1f1f;
+}
+
+/* ===== FINAL TEAM SELECTOR WIDTH OVERRIDE ===== */
+
+header .team-selector.cc-agent-dropdown {
+  width: auto !important;        /* 🔥 force override */
+  flex: 0 0 auto;                /* 🔥 stop flex stretching */
+}
+
+header .team-selector .cc-agent-toggle {
+  width: auto;
+  white-space: nowrap;
+}
+
+header .team-selector .cc-agent-toggle {
+  background: #ffffff;
+  color: #1f1f1f;   /* 🔥 ensures readable in light-only mode */
 }
 
 

@@ -1199,6 +1199,34 @@ async function openOpenRepairCasesReport() {
   renderOrcTable("openRepairCasesTable", openMatrix);
   renderOrcTable("readyForClosureTable", readyMatrix);
 
+  // ===== SBD SUMMARY CALCULATION =====
+  const sbdIdx = TABLE_SCHEMAS["Repair Cases"].indexOf("SBD");
+  
+  let met = 0;
+  let notMet = 0;
+  let na = 0;
+  
+  openCases.forEach(caseId => {
+    const row = repair.find(r => r[0] === caseId);
+    if (!row) return;
+  
+    const sbd = normalizeText(row[sbdIdx]);
+  
+    if (sbd === "met") met++;
+    else if (sbd === "not met") notMet++;
+    else na++;
+  });
+  
+  const total = met + notMet + na;
+  
+  const pct = (v) =>
+    total ? Math.round((v / total) * 100) : 0;
+  
+  document.getElementById("orcSbdSummary").textContent =
+    `SBD Data - Met: ${met} (${pct(met)}%) | ` +
+    `Not Met: ${notMet} (${pct(notMet)}%) | ` +
+    `NA: ${na} (${pct(na)}%)`;
+  
   openModal("openRepairCasesReportModal");
 }
 
@@ -2710,6 +2738,7 @@ document.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
+
 
 
 
